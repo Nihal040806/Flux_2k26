@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Fraud Alerts | FraudShield AI</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script>
+    tailwind.config = { theme: { extend: {
+        colors: { "primary":"#3b82f6","primary-container":"#dbeafe","on-primary":"#ffffff","secondary":"#06b6d4","secondary-container":"#cffafe","on-secondary":"#ffffff","tertiary":"#f59e0b","tertiary-container":"#fef3c7","on-tertiary":"#ffffff","error":"#ef4444","error-container":"#fee2e2","on-error":"#ffffff","on-error-container":"#991b1b","surface":"#ffffff","on-surface":"#0f172a","on-surface-variant":"#64748b","background":"#f8fafc","outline":"#cbd5e1","outline-variant":"#e2e8f0","surface-container-lowest":"#ffffff","surface-container-low":"#f8fafc","surface-container":"#f1f5f9","surface-container-high":"#e2e8f0","surface-container-highest":"#e2e8f0","surface-variant":"#f1f5f9","surface-bright":"#ffffff","on-background":"#0f172a","on-tertiary-container":"#92400e","on-secondary-container":"#155e75" },
+        fontFamily: { "headline":["Inter"],"body":["Inter"],"label":["Inter"] },
+        borderRadius: {"DEFAULT":"0.5rem","lg":"0.75rem","xl":"1rem","full":"9999px"},
+    }}};
+</script>
+<style>
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; vertical-align: middle; }
+    body { background-color: #f8fafc; color: #0f172a; font-family: 'Inter', sans-serif; }
+    .pulse-glow { box-shadow: 0 0 0 0 rgba(59,130,246,0.4); animation: pulse 2s infinite; }
+    @keyframes pulse { 0%{transform:scale(0.95);box-shadow:0 0 0 0 rgba(59,130,246,0.7)} 70%{transform:scale(1);box-shadow:0 0 0 10px rgba(59,130,246,0)} 100%{transform:scale(0.95);box-shadow:0 0 0 0 rgba(59,130,246,0)} }
+    ::-webkit-scrollbar{width:6px} ::-webkit-scrollbar-track{background:#f8fafc} ::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:10px}
+</style>
+</head>
+<body class="antialiased">
+<div class="flex min-h-screen">
+<aside class="flex flex-col sticky top-0 h-screen w-64 border-r border-slate-200 bg-white text-sm z-50">
+<div class="p-6 flex items-center gap-3">
+<div class="w-9 h-9 rounded-xl bg-blue-500 flex items-center justify-center shadow-lg shadow-blue-500/20"><span class="material-symbols-outlined text-white" style="font-variation-settings: 'FILL' 1;">security</span></div>
+<div><h1 class="text-lg font-black tracking-tight text-slate-900">FraudShield AI</h1><p class="text-[10px] uppercase tracking-widest text-blue-500 font-bold">The Sentient Shield</p></div>
+</div>
+<nav class="flex-1 px-3 py-6 space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition-all rounded-xl" href="dashboard.html"><span class="material-symbols-outlined">dashboard</span> Dashboard</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition-all rounded-xl" href="transactions.html"><span class="material-symbols-outlined">payments</span> Transactions</a>
+<a class="flex items-center gap-3 px-4 py-3 bg-blue-50 text-blue-600 rounded-xl font-medium" href="alerts.html"><span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">warning</span> Alerts</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition-all rounded-xl" href="analytics.html"><span class="material-symbols-outlined">analytics</span> Analytics</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition-all rounded-xl" href="ai-agents.html"><span class="material-symbols-outlined">memory</span> AI Agents</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition-all rounded-xl" href="settings.html"><span class="material-symbols-outlined">settings</span> Settings</a>
+</nav>
+<div class="p-4 border-t border-slate-100">
+<button class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-4 rounded-xl text-sm active:scale-[0.98] transition-all shadow-lg shadow-blue-500/20">Generate Report</button>
+<a class="flex items-center gap-3 px-4 py-3 mt-3 text-slate-400 hover:text-slate-600 transition-all" href="#"><span class="material-symbols-outlined">help_outline</span> Support</a>
+</div>
+</aside>
+<main class="flex-1 bg-slate-50/50 overflow-x-hidden">
+<header class="flex justify-between items-center px-8 sticky top-0 z-50 w-full h-16 border-b border-slate-100 bg-white/80 backdrop-blur-xl">
+<div class="flex items-center gap-6"><span class="text-slate-400 hover:text-blue-500 transition-colors cursor-pointer text-sm font-medium">Network</span><span class="text-slate-400 hover:text-blue-500 transition-colors cursor-pointer text-sm font-medium">Audit Log</span></div>
+<div class="flex items-center gap-4">
+<button class="p-2 text-slate-400 hover:text-blue-500 transition-colors relative"><span class="material-symbols-outlined">notifications</span><span class="absolute -top-0 -right-0 w-4 h-4 bg-red-500 text-white font-bold text-[9px] flex items-center justify-center rounded-full">3</span></button>
+<div class="h-8 w-px bg-slate-100 mx-2"></div>
+<div class="flex items-center gap-3"><span class="text-xs font-medium text-right hidden sm:block"><span class="block text-slate-800">Alex Rivera</span><span class="block text-slate-400">Security Lead</span></span><div class="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center text-white font-bold text-xs shadow-lg shadow-blue-500/20">AR</div></div>
+</div>
+</header>
+<div class="p-8 grid grid-cols-12 gap-8">
+<div class="col-span-12 lg:col-span-9 space-y-8">
+<header class="flex justify-between items-end">
+<div class="space-y-1">
+<h1 class="text-3xl font-black text-slate-900 tracking-tight flex items-center gap-4">Fraud Alerts <span class="bg-red-50 text-red-500 px-3 py-1 rounded-full text-sm font-bold border border-red-100">28 Active Alerts</span></h1>
+<p class="text-slate-400 text-sm flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-blue-500 pulse-glow"></span> Real-time monitoring active across all global nodes.</p>
+</div>
+<button class="px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm font-semibold flex items-center gap-2 hover:bg-slate-50 shadow-sm"><span class="material-symbols-outlined text-sm">download</span> Export</button>
+</header>
+<!-- Filters -->
+<div class="bg-white p-4 rounded-xl border border-slate-100 shadow-sm flex flex-wrap gap-4 items-center">
+<div class="flex-1 grid grid-cols-2 md:grid-cols-4 gap-4">
+<div class="space-y-1"><label class="text-[10px] uppercase tracking-widest text-slate-400 font-bold px-1">Priority</label><select class="w-full bg-slate-50 border-slate-200 rounded-xl text-xs focus:ring-blue-500"><option>All Priorities</option><option>Critical</option><option>High</option><option>Medium</option></select></div>
+<div class="space-y-1"><label class="text-[10px] uppercase tracking-widest text-slate-400 font-bold px-1">Status</label><select class="w-full bg-slate-50 border-slate-200 rounded-xl text-xs focus:ring-blue-500"><option>Active</option><option>Resolved</option><option>Dismissed</option></select></div>
+<div class="space-y-1"><label class="text-[10px] uppercase tracking-widest text-slate-400 font-bold px-1">AI Agent</label><select class="w-full bg-slate-50 border-slate-200 rounded-xl text-xs focus:ring-blue-500"><option>All Agents</option><option>Pattern Engine</option><option>Behavioral AI</option><option>Compliance</option></select></div>
+<div class="space-y-1"><label class="text-[10px] uppercase tracking-widest text-slate-400 font-bold px-1">Date Range</label><button class="w-full bg-slate-50 flex justify-between items-center px-3 py-2 rounded-xl text-xs border border-slate-200">Last 24 Hours <span class="material-symbols-outlined text-sm">calendar_today</span></button></div>
+</div>
+<button class="self-end p-2 bg-blue-50 text-blue-500 rounded-xl hover:bg-blue-100"><span class="material-symbols-outlined">filter_list</span></button>
+</div>
+<!-- Cards -->
+<div class="space-y-4">
+<!-- Critical -->
+<div class="bg-white p-6 rounded-xl border-l-4 border-red-500 hover:shadow-md transition-all group shadow-sm border border-slate-100">
+<div class="flex justify-between items-start mb-6">
+<div class="flex gap-4">
+<div class="w-12 h-12 rounded-xl bg-red-50 flex items-center justify-center text-red-500"><span class="material-symbols-outlined text-3xl" style="font-variation-settings: 'FILL' 1;">emergency_home</span></div>
+<div>
+<div class="flex items-center gap-2"><h3 class="text-lg font-bold text-slate-900 group-hover:text-blue-500 transition-colors">Account Takeover Attempt</h3><span class="text-[10px] px-2 py-0.5 bg-red-50 text-red-500 rounded-full font-bold uppercase border border-red-100">Critical</span></div>
+<p class="text-slate-400 text-sm mt-1">Simultaneous login attempts from 14 disparate geographic locations within 2 minutes.</p>
+</div>
+</div>
+<div class="text-right"><div class="text-xs text-slate-400 font-medium">2 minutes ago</div><div class="mt-1 flex items-center justify-end gap-1 text-blue-500"><span class="text-[10px] font-bold">Risk Score</span><span class="text-lg font-black">98/100</span></div></div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+<div class="bg-slate-50 p-3 rounded-xl border border-slate-100"><div class="text-[10px] uppercase text-slate-400 font-bold mb-1">Transaction Details</div><div class="text-sm font-semibold text-slate-800">$12,450.00 <span class="text-xs font-normal text-slate-400">USD</span></div><div class="text-xs text-slate-400">Acc: **** 9204</div></div>
+<div class="bg-slate-50 p-3 rounded-xl border border-slate-100"><div class="text-[10px] uppercase text-slate-400 font-bold mb-1">AI Agent</div><div class="text-sm font-semibold flex items-center gap-2 text-slate-800"><span class="material-symbols-outlined text-blue-500 text-xs">psychology</span> Behavioral AI</div><div class="text-xs text-slate-400">Confidence: 99.4%</div></div>
+<div class="bg-slate-50 p-3 rounded-xl border border-slate-100"><div class="text-[10px] uppercase text-slate-400 font-bold mb-1">Detection</div><div class="text-sm font-semibold text-slate-800">Velocity Pattern</div><div class="text-xs text-slate-400">Geo-location Anomaly</div></div>
+</div>
+<div class="flex justify-between items-center pt-4 border-t border-slate-100">
+<div class="flex gap-2"><button class="px-4 py-2 bg-blue-500 text-white text-xs font-bold rounded-xl hover:bg-blue-600 shadow-sm">Investigate</button><button class="px-4 py-2 bg-white text-slate-600 text-xs font-bold rounded-xl border border-slate-200 hover:bg-slate-50">Escalate</button></div>
+<div class="flex gap-4"><button class="text-slate-400 hover:text-slate-600 text-xs font-medium">Dismiss</button><button class="text-blue-500 hover:underline text-xs font-bold">Mark Resolved</button></div>
+</div>
+</div>
+<!-- High -->
+<div class="bg-white p-6 rounded-xl border-l-4 border-amber-400 hover:shadow-md transition-all group shadow-sm border border-slate-100">
+<div class="flex justify-between items-start mb-6">
+<div class="flex gap-4">
+<div class="w-12 h-12 rounded-xl bg-amber-50 flex items-center justify-center text-amber-500"><span class="material-symbols-outlined text-3xl">payments</span></div>
+<div>
+<div class="flex items-center gap-2"><h3 class="text-lg font-bold text-slate-900 group-hover:text-blue-500 transition-colors">Unusual Wire Transfer</h3><span class="text-[10px] px-2 py-0.5 bg-amber-50 text-amber-600 rounded-full font-bold uppercase border border-amber-100">High</span></div>
+<p class="text-slate-400 text-sm mt-1">Wire transfer to a high-risk jurisdiction not previously associated with this entity.</p>
+</div>
+</div>
+<div class="text-right"><div class="text-xs text-slate-400 font-medium">14 minutes ago</div><div class="mt-1 flex items-center justify-end gap-1 text-amber-500"><span class="text-[10px] font-bold">Risk Score</span><span class="text-lg font-black">72/100</span></div></div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+<div class="bg-slate-50 p-3 rounded-xl border border-slate-100"><div class="text-[10px] uppercase text-slate-400 font-bold mb-1">Transaction</div><div class="text-sm font-semibold text-slate-800">$50,000.00 USD</div><div class="text-xs text-slate-400">Recipient: Z-GLOBAL-CORP</div></div>
+<div class="bg-slate-50 p-3 rounded-xl border border-slate-100"><div class="text-[10px] uppercase text-slate-400 font-bold mb-1">AI Agent</div><div class="text-sm font-semibold flex items-center gap-2 text-slate-800"><span class="material-symbols-outlined text-blue-500 text-xs">hub</span> Pattern Engine</div><div class="text-xs text-slate-400">Confidence: 84%</div></div>
+<div class="bg-slate-50 p-3 rounded-xl border border-slate-100"><div class="text-[10px] uppercase text-slate-400 font-bold mb-1">Jurisdiction</div><div class="text-sm font-semibold text-slate-800">Cayman Islands</div><div class="text-xs text-slate-400">High Risk Zone</div></div>
+</div>
+<div class="flex justify-between items-center pt-4 border-t border-slate-100">
+<div class="flex gap-2"><button class="px-4 py-2 bg-blue-500 text-white text-xs font-bold rounded-xl hover:bg-blue-600">Investigate</button><button class="px-4 py-2 bg-white text-slate-600 text-xs font-bold rounded-xl border border-slate-200">Escalate</button></div>
+<div class="flex gap-4"><button class="text-slate-400 text-xs font-medium">Dismiss</button><button class="text-blue-500 text-xs font-bold">Mark Resolved</button></div>
+</div>
+</div>
+<!-- Medium -->
+<div class="bg-white p-6 rounded-xl border-l-4 border-cyan-400 hover:shadow-md transition-all group shadow-sm border border-slate-100">
+<div class="flex justify-between items-start mb-6">
+<div class="flex gap-4">
+<div class="w-12 h-12 rounded-xl bg-cyan-50 flex items-center justify-center text-cyan-500"><span class="material-symbols-outlined text-3xl">shopping_cart</span></div>
+<div>
+<div class="flex items-center gap-2"><h3 class="text-lg font-bold text-slate-900 group-hover:text-blue-500 transition-colors">Merchant Category Mismatch</h3><span class="text-[10px] px-2 py-0.5 bg-cyan-50 text-cyan-600 rounded-full font-bold uppercase border border-cyan-100">Medium</span></div>
+<p class="text-slate-400 text-sm mt-1">Sudden high-volume spend in luxury retail category, atypical for user history.</p>
+</div>
+</div>
+<div class="text-right"><div class="text-xs text-slate-400 font-medium">42 minutes ago</div><div class="mt-1 flex items-center justify-end gap-1 text-cyan-500"><span class="text-[10px] font-bold">Risk Score</span><span class="text-lg font-black">45/100</span></div></div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+<div class="bg-slate-50 p-3 rounded-xl border border-slate-100"><div class="text-[10px] uppercase text-slate-400 font-bold mb-1">Transaction</div><div class="text-sm font-semibold text-slate-800">$3,200.00 USD</div><div class="text-xs text-slate-400">Merchant: LUX-G-PARIS</div></div>
+<div class="bg-slate-50 p-3 rounded-xl border border-slate-100"><div class="text-[10px] uppercase text-slate-400 font-bold mb-1">AI Agent</div><div class="text-sm font-semibold flex items-center gap-2 text-slate-800"><span class="material-symbols-outlined text-blue-500 text-xs">verified_user</span> Compliance Check</div><div class="text-xs text-slate-400">Confidence: 62%</div></div>
+<div class="bg-slate-50 p-3 rounded-xl border border-slate-100"><div class="text-[10px] uppercase text-slate-400 font-bold mb-1">Trend</div><div class="text-sm font-semibold text-slate-800">Spending Spike</div><div class="text-xs text-slate-400">3x Daily Average</div></div>
+</div>
+<div class="flex justify-between items-center pt-4 border-t border-slate-100">
+<div class="flex gap-2"><button class="px-4 py-2 bg-blue-500 text-white text-xs font-bold rounded-xl hover:bg-blue-600">Investigate</button><button class="px-4 py-2 bg-white text-slate-600 text-xs font-bold rounded-xl border border-slate-200">Escalate</button></div>
+<div class="flex gap-4"><button class="text-slate-400 text-xs font-medium">Dismiss</button><button class="text-blue-500 text-xs font-bold">Mark Resolved</button></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Sidebar -->
+<aside class="hidden lg:block lg:col-span-3 space-y-6">
+<div class="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm space-y-8 sticky top-24">
+<h2 class="text-xs font-black uppercase tracking-widest text-slate-800">24h Intelligence Summary</h2>
+<div class="space-y-6">
+<div class="flex items-center justify-between group"><div><div class="text-2xl font-black text-slate-900 group-hover:text-blue-500 transition-colors">12</div><div class="text-[10px] text-slate-400 font-bold uppercase">Alerts Today</div></div><div class="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center"><span class="material-symbols-outlined text-blue-500 text-xl">notification_important</span></div></div>
+<div class="flex items-center justify-between group"><div><div class="text-2xl font-black text-slate-900 group-hover:text-blue-500 transition-colors">3.2m</div><div class="text-[10px] text-slate-400 font-bold uppercase">Avg Response</div></div><div class="w-10 h-10 rounded-full bg-cyan-50 flex items-center justify-center"><span class="material-symbols-outlined text-cyan-500 text-xl">timer</span></div></div>
+<div class="flex items-center justify-between group"><div><div class="text-2xl font-black text-slate-900 group-hover:text-blue-500 transition-colors">94%</div><div class="text-[10px] text-slate-400 font-bold uppercase">Resolution Rate</div></div><div class="w-10 h-10 rounded-full bg-amber-50 flex items-center justify-center"><span class="material-symbols-outlined text-amber-500 text-xl">task_alt</span></div></div>
+<div class="flex items-center justify-between group"><div><div class="text-2xl font-black text-slate-900 group-hover:text-blue-500 transition-colors">2.3%</div><div class="text-[10px] text-slate-400 font-bold uppercase">False Positive</div></div><div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center"><span class="material-symbols-outlined text-slate-500 text-xl">fact_check</span></div></div>
+</div>
+<div class="pt-6 border-t border-slate-100">
+<div class="text-[10px] text-slate-400 font-bold uppercase mb-4">Volume Trend</div>
+<div class="flex items-end gap-1 h-12">
+<div class="flex-1 bg-blue-100 rounded-t h-[40%]"></div><div class="flex-1 bg-blue-200 rounded-t h-[60%]"></div><div class="flex-1 bg-blue-100 rounded-t h-[30%]"></div><div class="flex-1 bg-blue-300 rounded-t h-[80%]"></div><div class="flex-1 bg-blue-500 rounded-t h-[100%]"></div><div class="flex-1 bg-blue-200 rounded-t h-[50%]"></div><div class="flex-1 bg-blue-100 rounded-t h-[20%]"></div>
+</div>
+</div>
+<div class="p-4 bg-blue-50 rounded-xl border border-blue-100">
+<div class="text-xs font-bold text-blue-600 mb-2 flex items-center gap-2"><span class="material-symbols-outlined text-sm">bolt</span> AI Insights</div>
+<p class="text-[11px] text-slate-500 leading-relaxed">Detection rates are 12% higher than last week. Behavioral AI is showing increased accuracy in login-velocity patterns.</p>
+</div>
+</div>
+</aside>
+</div>
+</main>
+</div>
+</body></html>
