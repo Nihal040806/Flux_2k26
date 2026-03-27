@@ -61,25 +61,25 @@
 <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 relative overflow-hidden group hover:shadow-md transition-shadow">
 <div class="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity"><span class="material-symbols-outlined text-5xl">trending_up</span></div>
 <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Fraud Prevention Rate</p>
-<h3 class="text-3xl font-black tracking-tighter text-blue-500">99.7%</h3>
+<h3 id="stat-prevention-rate" class="text-3xl font-black tracking-tighter text-blue-500">...</h3>
 <div class="mt-4 flex items-center gap-2"><span class="text-emerald-600 text-[10px] font-bold bg-emerald-50 px-1.5 py-0.5 rounded-md border border-emerald-100">+0.3%</span><span class="text-[10px] text-slate-400">vs last month</span></div>
 </div>
 <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 relative overflow-hidden group hover:shadow-md transition-shadow">
 <div class="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity"><span class="material-symbols-outlined text-5xl text-cyan-500">savings</span></div>
 <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Capital Protected</p>
-<h3 class="text-3xl font-black tracking-tighter text-cyan-500">$2.4M</h3>
+<h3 id="stat-capital-protected" class="text-3xl font-black tracking-tighter text-cyan-500">...</h3>
 <div class="mt-4 flex items-center gap-2"><span class="text-emerald-600 text-[10px] font-bold bg-emerald-50 px-1.5 py-0.5 rounded-md border border-emerald-100">+18%</span><span class="text-[10px] text-slate-400">this quarter</span></div>
 </div>
 <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 relative overflow-hidden group hover:shadow-md transition-shadow">
 <div class="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity"><span class="material-symbols-outlined text-5xl text-amber-500">speed</span></div>
 <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Avg Detection Speed</p>
-<h3 class="text-3xl font-black tracking-tighter text-amber-500">1.2ms</h3>
+<h3 id="stat-detection-speed" class="text-3xl font-black tracking-tighter text-amber-500">...</h3>
 <div class="mt-4 flex items-center gap-2"><span class="text-emerald-600 text-[10px] font-bold bg-emerald-50 px-1.5 py-0.5 rounded-md border border-emerald-100">-0.3ms</span><span class="text-[10px] text-slate-400">faster</span></div>
 </div>
 <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 relative overflow-hidden group hover:shadow-md transition-shadow">
 <div class="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity"><span class="material-symbols-outlined text-5xl text-red-500">bug_report</span></div>
 <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">False Positive Rate</p>
-<h3 class="text-3xl font-black tracking-tighter text-red-500">0.3%</h3>
+<h3 id="stat-false-positive-rate" class="text-3xl font-black tracking-tighter text-red-500">...</h3>
 <div class="mt-4 flex items-center gap-2"><span class="text-emerald-600 text-[10px] font-bold bg-emerald-50 px-1.5 py-0.5 rounded-md border border-emerald-100">-0.2%</span><span class="text-[10px] text-slate-400">improved</span></div>
 </div>
 </div>
@@ -143,6 +143,24 @@
 </div>
 </div>
 </div>
+</div>
 </main>
 </div>
+<script src="api.js"></script>
+<script>
+async function loadAnalytics() {
+    try {
+        const data = await apiGet('/api/analytics');
+        
+        document.getElementById('stat-prevention-rate').textContent = `${data.kpis.prevention_rate_pct}%`;
+        document.getElementById('stat-capital-protected').textContent = formatCurrency(data.kpis.capital_protected);
+        document.getElementById('stat-detection-speed').textContent = `${data.kpis.avg_detection_speed_ms}ms`;
+        document.getElementById('stat-false-positive-rate').textContent = `${data.kpis.false_positive_rate_pct}%`;
+        
+    } catch (err) {
+        console.error("Failed to load analytics: ", err);
+    }
+}
+document.addEventListener('DOMContentLoaded', loadAnalytics);
+</script>
 </body></html>

@@ -54,7 +54,7 @@
 <div class="col-span-12 lg:col-span-9 space-y-8">
 <header class="flex justify-between items-end">
 <div class="space-y-1">
-<h1 class="text-3xl font-black text-slate-900 tracking-tight flex items-center gap-4">Fraud Alerts <span class="bg-red-50 text-red-500 px-3 py-1 rounded-full text-sm font-bold border border-red-100">28 Active Alerts</span></h1>
+<h1 class="text-3xl font-black text-slate-900 tracking-tight flex items-center gap-4">Fraud Alerts <span id="alerts-count-badge" class="bg-red-50 text-red-500 px-3 py-1 rounded-full text-sm font-bold border border-red-100">... Active Alerts</span></h1>
 <p class="text-slate-400 text-sm flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-blue-500 pulse-glow"></span> Real-time monitoring active across all global nodes.</p>
 </div>
 <button class="px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm font-semibold flex items-center gap-2 hover:bg-slate-50 shadow-sm"><span class="material-symbols-outlined text-sm">download</span> Export</button>
@@ -70,73 +70,11 @@
 <button class="self-end p-2 bg-blue-50 text-blue-500 rounded-xl hover:bg-blue-100"><span class="material-symbols-outlined">filter_list</span></button>
 </div>
 <!-- Cards -->
-<div class="space-y-4">
-<!-- Critical -->
-<div class="bg-white p-6 rounded-xl border-l-4 border-red-500 hover:shadow-md transition-all group shadow-sm border border-slate-100">
-<div class="flex justify-between items-start mb-6">
-<div class="flex gap-4">
-<div class="w-12 h-12 rounded-xl bg-red-50 flex items-center justify-center text-red-500"><span class="material-symbols-outlined text-3xl" style="font-variation-settings: 'FILL' 1;">emergency_home</span></div>
-<div>
-<div class="flex items-center gap-2"><h3 class="text-lg font-bold text-slate-900 group-hover:text-blue-500 transition-colors">Account Takeover Attempt</h3><span class="text-[10px] px-2 py-0.5 bg-red-50 text-red-500 rounded-full font-bold uppercase border border-red-100">Critical</span></div>
-<p class="text-slate-400 text-sm mt-1">Simultaneous login attempts from 14 disparate geographic locations within 2 minutes.</p>
-</div>
-</div>
-<div class="text-right"><div class="text-xs text-slate-400 font-medium">2 minutes ago</div><div class="mt-1 flex items-center justify-end gap-1 text-blue-500"><span class="text-[10px] font-bold">Risk Score</span><span class="text-lg font-black">98/100</span></div></div>
-</div>
-<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-<div class="bg-slate-50 p-3 rounded-xl border border-slate-100"><div class="text-[10px] uppercase text-slate-400 font-bold mb-1">Transaction Details</div><div class="text-sm font-semibold text-slate-800">$12,450.00 <span class="text-xs font-normal text-slate-400">USD</span></div><div class="text-xs text-slate-400">Acc: **** 9204</div></div>
-<div class="bg-slate-50 p-3 rounded-xl border border-slate-100"><div class="text-[10px] uppercase text-slate-400 font-bold mb-1">AI Agent</div><div class="text-sm font-semibold flex items-center gap-2 text-slate-800"><span class="material-symbols-outlined text-blue-500 text-xs">psychology</span> Behavioral AI</div><div class="text-xs text-slate-400">Confidence: 99.4%</div></div>
-<div class="bg-slate-50 p-3 rounded-xl border border-slate-100"><div class="text-[10px] uppercase text-slate-400 font-bold mb-1">Detection</div><div class="text-sm font-semibold text-slate-800">Velocity Pattern</div><div class="text-xs text-slate-400">Geo-location Anomaly</div></div>
-</div>
-<div class="flex justify-between items-center pt-4 border-t border-slate-100">
-<div class="flex gap-2"><button class="px-4 py-2 bg-blue-500 text-white text-xs font-bold rounded-xl hover:bg-blue-600 shadow-sm">Investigate</button><button class="px-4 py-2 bg-white text-slate-600 text-xs font-bold rounded-xl border border-slate-200 hover:bg-slate-50">Escalate</button></div>
-<div class="flex gap-4"><button class="text-slate-400 hover:text-slate-600 text-xs font-medium">Dismiss</button><button class="text-blue-500 hover:underline text-xs font-bold">Mark Resolved</button></div>
-</div>
-</div>
-<!-- High -->
-<div class="bg-white p-6 rounded-xl border-l-4 border-amber-400 hover:shadow-md transition-all group shadow-sm border border-slate-100">
-<div class="flex justify-between items-start mb-6">
-<div class="flex gap-4">
-<div class="w-12 h-12 rounded-xl bg-amber-50 flex items-center justify-center text-amber-500"><span class="material-symbols-outlined text-3xl">payments</span></div>
-<div>
-<div class="flex items-center gap-2"><h3 class="text-lg font-bold text-slate-900 group-hover:text-blue-500 transition-colors">Unusual Wire Transfer</h3><span class="text-[10px] px-2 py-0.5 bg-amber-50 text-amber-600 rounded-full font-bold uppercase border border-amber-100">High</span></div>
-<p class="text-slate-400 text-sm mt-1">Wire transfer to a high-risk jurisdiction not previously associated with this entity.</p>
-</div>
-</div>
-<div class="text-right"><div class="text-xs text-slate-400 font-medium">14 minutes ago</div><div class="mt-1 flex items-center justify-end gap-1 text-amber-500"><span class="text-[10px] font-bold">Risk Score</span><span class="text-lg font-black">72/100</span></div></div>
-</div>
-<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-<div class="bg-slate-50 p-3 rounded-xl border border-slate-100"><div class="text-[10px] uppercase text-slate-400 font-bold mb-1">Transaction</div><div class="text-sm font-semibold text-slate-800">$50,000.00 USD</div><div class="text-xs text-slate-400">Recipient: Z-GLOBAL-CORP</div></div>
-<div class="bg-slate-50 p-3 rounded-xl border border-slate-100"><div class="text-[10px] uppercase text-slate-400 font-bold mb-1">AI Agent</div><div class="text-sm font-semibold flex items-center gap-2 text-slate-800"><span class="material-symbols-outlined text-blue-500 text-xs">hub</span> Pattern Engine</div><div class="text-xs text-slate-400">Confidence: 84%</div></div>
-<div class="bg-slate-50 p-3 rounded-xl border border-slate-100"><div class="text-[10px] uppercase text-slate-400 font-bold mb-1">Jurisdiction</div><div class="text-sm font-semibold text-slate-800">Cayman Islands</div><div class="text-xs text-slate-400">High Risk Zone</div></div>
-</div>
-<div class="flex justify-between items-center pt-4 border-t border-slate-100">
-<div class="flex gap-2"><button class="px-4 py-2 bg-blue-500 text-white text-xs font-bold rounded-xl hover:bg-blue-600">Investigate</button><button class="px-4 py-2 bg-white text-slate-600 text-xs font-bold rounded-xl border border-slate-200">Escalate</button></div>
-<div class="flex gap-4"><button class="text-slate-400 text-xs font-medium">Dismiss</button><button class="text-blue-500 text-xs font-bold">Mark Resolved</button></div>
-</div>
-</div>
-<!-- Medium -->
-<div class="bg-white p-6 rounded-xl border-l-4 border-cyan-400 hover:shadow-md transition-all group shadow-sm border border-slate-100">
-<div class="flex justify-between items-start mb-6">
-<div class="flex gap-4">
-<div class="w-12 h-12 rounded-xl bg-cyan-50 flex items-center justify-center text-cyan-500"><span class="material-symbols-outlined text-3xl">shopping_cart</span></div>
-<div>
-<div class="flex items-center gap-2"><h3 class="text-lg font-bold text-slate-900 group-hover:text-blue-500 transition-colors">Merchant Category Mismatch</h3><span class="text-[10px] px-2 py-0.5 bg-cyan-50 text-cyan-600 rounded-full font-bold uppercase border border-cyan-100">Medium</span></div>
-<p class="text-slate-400 text-sm mt-1">Sudden high-volume spend in luxury retail category, atypical for user history.</p>
-</div>
-</div>
-<div class="text-right"><div class="text-xs text-slate-400 font-medium">42 minutes ago</div><div class="mt-1 flex items-center justify-end gap-1 text-cyan-500"><span class="text-[10px] font-bold">Risk Score</span><span class="text-lg font-black">45/100</span></div></div>
-</div>
-<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-<div class="bg-slate-50 p-3 rounded-xl border border-slate-100"><div class="text-[10px] uppercase text-slate-400 font-bold mb-1">Transaction</div><div class="text-sm font-semibold text-slate-800">$3,200.00 USD</div><div class="text-xs text-slate-400">Merchant: LUX-G-PARIS</div></div>
-<div class="bg-slate-50 p-3 rounded-xl border border-slate-100"><div class="text-[10px] uppercase text-slate-400 font-bold mb-1">AI Agent</div><div class="text-sm font-semibold flex items-center gap-2 text-slate-800"><span class="material-symbols-outlined text-blue-500 text-xs">verified_user</span> Compliance Check</div><div class="text-xs text-slate-400">Confidence: 62%</div></div>
-<div class="bg-slate-50 p-3 rounded-xl border border-slate-100"><div class="text-[10px] uppercase text-slate-400 font-bold mb-1">Trend</div><div class="text-sm font-semibold text-slate-800">Spending Spike</div><div class="text-xs text-slate-400">3x Daily Average</div></div>
-</div>
-<div class="flex justify-between items-center pt-4 border-t border-slate-100">
-<div class="flex gap-2"><button class="px-4 py-2 bg-blue-500 text-white text-xs font-bold rounded-xl hover:bg-blue-600">Investigate</button><button class="px-4 py-2 bg-white text-slate-600 text-xs font-bold rounded-xl border border-slate-200">Escalate</button></div>
-<div class="flex gap-4"><button class="text-slate-400 text-xs font-medium">Dismiss</button><button class="text-blue-500 text-xs font-bold">Mark Resolved</button></div>
-</div>
-</div>
+<div id="alerts-container" class="space-y-4">
+    <div class="text-center py-12 text-slate-400">
+        <span class="material-symbols-outlined text-4xl animate-spin text-blue-500">sync</span>
+        <p class="mt-2 text-sm font-medium">Loading live fraud alerts from backend...</p>
+    </div>
 </div>
 </div>
 <!-- Right Sidebar -->
@@ -164,4 +102,75 @@
 </div>
 </main>
 </div>
+<script src="api.js"></script>
+<script>
+async function loadAlerts() {
+    const container = document.getElementById('alerts-container');
+    const badge = document.getElementById('alerts-count-badge');
+    try {
+        const data = await apiGet('/api/alerts');
+        
+        badge.textContent = `${data.summary.total_active} Active Alerts`;
+        
+        container.innerHTML = data.alerts.map(alert => {
+            const cColor = alert.severity === 'Critical' ? 'red' : (alert.severity === 'High' ? 'amber' : 'cyan');
+            
+            return `
+            <div class="bg-white p-6 rounded-xl border-l-4 border-${cColor}-500 hover:shadow-md transition-all group shadow-sm border border-slate-100">
+                <div class="flex justify-between items-start mb-6">
+                    <div class="flex gap-4">
+                        <div class="w-12 h-12 rounded-xl bg-${cColor}-50 flex items-center justify-center text-${cColor}-500">
+                            <span class="material-symbols-outlined text-3xl" style="font-variation-settings: 'FILL' 1;">${alert.icon}</span>
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <h3 class="text-lg font-bold text-slate-900 group-hover:text-blue-500 transition-colors">${alert.title}</h3>
+                                <span class="text-[10px] px-2 py-0.5 bg-${cColor}-50 text-${cColor}-600 rounded-full font-bold uppercase border border-${cColor}-100">${alert.severity}</span>
+                            </div>
+                            <p class="text-slate-400 text-sm mt-1">${alert.description}</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-xs text-slate-400 font-medium">${alert.time_ago}</div>
+                        <div class="mt-1 flex items-center justify-end gap-1 text-${cColor}-500">
+                            <span class="text-[10px] font-bold">Risk Score</span>
+                            <span class="text-lg font-black">${alert.risk_score}/100</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                        <div class="text-[10px] uppercase text-slate-400 font-bold mb-1">Transaction Details</div>
+                        <div class="text-sm font-semibold text-slate-800">$${alert.amount.toFixed(2)} USD</div>
+                        <div class="text-xs text-slate-400">Card 1: ${alert.card1}</div>
+                    </div>
+                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                        <div class="text-[10px] uppercase text-slate-400 font-bold mb-1">AI Agent</div>
+                        <div class="text-sm font-semibold flex items-center gap-2 text-slate-800">
+                            <span class="material-symbols-outlined text-blue-500 text-xs">memory</span> ${alert.agent}
+                        </div>
+                        <div class="text-xs text-slate-400">Confidence: ${alert.confidence}%</div>
+                    </div>
+                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                        <div class="text-[10px] uppercase text-slate-400 font-bold mb-1">Detection</div>
+                        <div class="text-sm font-semibold text-slate-800">${alert.detection_type}</div>
+                        <div class="text-xs text-slate-400">Ref: ${alert.transaction_id}</div>
+                    </div>
+                </div>
+                <div class="flex justify-between items-center pt-4 border-t border-slate-100">
+                    <div class="flex gap-2">
+                        <button onclick="window.location.href='transactions.html'" class="px-4 py-2 bg-blue-500 text-white text-xs font-bold rounded-xl hover:bg-blue-600 shadow-sm">Investigate in Transactions</button>
+                    </div>
+                    <div class="flex gap-4">
+                        <button class="text-slate-400 hover:text-slate-600 text-xs font-medium">Dismiss</button>
+                    </div>
+                </div>
+            </div>`;
+        }).join('');
+    } catch (err) {
+        container.innerHTML = `<div class="p-8 text-center text-red-500">Failed to load alerts: ${err.message}</div>`;
+    }
+}
+document.addEventListener('DOMContentLoaded', loadAlerts);
+</script>
 </body></html>

@@ -74,49 +74,12 @@
 </div>
 </section>
 <!-- Agent Cards -->
-<section class="grid grid-cols-1 xl:grid-cols-3 gap-6">
-<div class="glass-card rounded-2xl p-6 flex flex-col space-y-6 hover:shadow-md transition-shadow">
-<div class="flex justify-between items-start">
-<div class="flex items-center gap-4"><div class="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-blue-500"><span class="material-symbols-outlined text-3xl">analytics</span></div>
-<div><h3 class="font-bold text-lg text-slate-900">Pattern Analysis Agent</h3><div class="flex items-center gap-2"><div class="pulse-container"><div class="pulse-ring"></div><div class="w-1.5 h-1.5 rounded-full bg-blue-500"></div></div><span class="text-[10px] font-bold text-blue-500 uppercase tracking-widest">Active</span></div></div></div>
-<div class="w-10 h-5 bg-blue-100 rounded-full relative cursor-pointer border border-blue-200"><div class="absolute right-0.5 top-0.5 w-4 h-4 bg-blue-500 rounded-full shadow"></div></div>
-</div>
-<p class="text-sm text-slate-400 leading-relaxed">Detects anomalous transaction patterns using statistical analysis and ML models.</p>
-<div class="grid grid-cols-2 gap-4 pt-4 border-t border-slate-100"><div><p class="text-[10px] text-slate-400 uppercase font-bold mb-1">Model</p><p class="text-sm font-semibold text-slate-800">XGBoost + LSTM</p></div><div><p class="text-[10px] text-slate-400 uppercase font-bold mb-1">Last Scan</p><p class="text-sm font-semibold text-slate-800">2 seconds ago</p></div></div>
-<div class="grid grid-cols-2 gap-4 bg-slate-50 p-4 rounded-xl">
-<div class="space-y-1"><p class="text-[10px] text-slate-400 font-bold">24,856 TX</p><div class="h-1.5 bg-slate-200 rounded-full overflow-hidden"><div class="h-full w-full bg-blue-500 rounded-full"></div></div></div>
-<div class="space-y-1"><p class="text-[10px] text-slate-400 font-bold">98.9% ACC</p><div class="h-1.5 bg-slate-200 rounded-full overflow-hidden"><div class="h-full w-[98.9%] bg-blue-500 rounded-full"></div></div></div>
-<div class="space-y-1"><p class="text-[10px] text-slate-400 font-bold">342 ANOMALIES</p><div class="h-1.5 bg-slate-200 rounded-full overflow-hidden"><div class="h-full w-1/3 bg-red-400 rounded-full"></div></div></div>
-<div class="space-y-1"><p class="text-[10px] text-slate-400 font-bold">1,200 TX/SEC</p><div class="h-1.5 bg-slate-200 rounded-full overflow-hidden"><div class="h-full w-4/5 bg-cyan-400 rounded-full"></div></div></div>
-</div></div>
-<div class="glass-card rounded-2xl p-6 flex flex-col space-y-6 hover:shadow-md transition-shadow">
-<div class="flex justify-between items-start">
-<div class="flex items-center gap-4"><div class="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-blue-500"><span class="material-symbols-outlined text-3xl">psychology</span></div>
-<div><h3 class="font-bold text-lg text-slate-900">Behavioral Analysis Agent</h3><div class="flex items-center gap-2"><div class="pulse-container"><div class="pulse-ring"></div><div class="w-1.5 h-1.5 rounded-full bg-blue-500"></div></div><span class="text-[10px] font-bold text-blue-500 uppercase tracking-widest">Active</span></div></div></div>
-<div class="w-10 h-5 bg-blue-100 rounded-full relative cursor-pointer border border-blue-200"><div class="absolute right-0.5 top-0.5 w-4 h-4 bg-blue-500 rounded-full shadow"></div></div>
-</div>
-<p class="text-sm text-slate-400 leading-relaxed">Analyzes user behavior and spending patterns against historical profiles.</p>
-<div class="grid grid-cols-2 gap-4 pt-4 border-t border-slate-100"><div><p class="text-[10px] text-slate-400 uppercase font-bold mb-1">Model</p><p class="text-sm font-semibold text-slate-800">Graph Neural Net</p></div><div><p class="text-[10px] text-slate-400 uppercase font-bold mb-1">Last Scan</p><p class="text-sm font-semibold text-slate-800">5 seconds ago</p></div></div>
-<div class="grid grid-cols-2 gap-4 bg-slate-50 p-4 rounded-xl">
-<div class="space-y-1"><p class="text-[10px] text-slate-400 font-bold">12,450 PROFILES</p><div class="h-1.5 bg-slate-200 rounded-full overflow-hidden"><div class="h-full w-3/4 bg-blue-500 rounded-full"></div></div></div>
-<div class="space-y-1"><p class="text-[10px] text-slate-400 font-bold">97.2% ACC</p><div class="h-1.5 bg-slate-200 rounded-full overflow-hidden"><div class="h-full w-[97%] bg-blue-500 rounded-full"></div></div></div>
-<div class="space-y-1"><p class="text-[10px] text-slate-400 font-bold">89 SUSPICIOUS</p><div class="h-1.5 bg-slate-200 rounded-full overflow-hidden"><div class="h-full w-[15%] bg-red-400 rounded-full"></div></div></div>
-<div class="space-y-1"><p class="text-[10px] text-slate-400 font-bold">800 TX/SEC</p><div class="h-1.5 bg-slate-200 rounded-full overflow-hidden"><div class="h-full w-1/2 bg-cyan-400 rounded-full"></div></div></div>
-</div></div>
-<div class="glass-card rounded-2xl p-6 flex flex-col space-y-6 hover:shadow-md transition-shadow">
-<div class="flex justify-between items-start">
-<div class="flex items-center gap-4"><div class="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-blue-500"><span class="material-symbols-outlined text-3xl" style="font-variation-settings: 'FILL' 1;">fact_check</span></div>
-<div><h3 class="font-bold text-lg text-slate-900">Compliance Agent</h3><div class="flex items-center gap-2"><div class="pulse-container"><div class="pulse-ring"></div><div class="w-1.5 h-1.5 rounded-full bg-blue-500"></div></div><span class="text-[10px] font-bold text-blue-500 uppercase tracking-widest">Active</span></div></div></div>
-<div class="w-10 h-5 bg-blue-100 rounded-full relative cursor-pointer border border-blue-200"><div class="absolute right-0.5 top-0.5 w-4 h-4 bg-blue-500 rounded-full shadow"></div></div>
-</div>
-<p class="text-sm text-slate-400 leading-relaxed">Checks transactions against financial regulations, AML rules, and databases.</p>
-<div class="grid grid-cols-2 gap-4 pt-4 border-t border-slate-100"><div><p class="text-[10px] text-slate-400 uppercase font-bold mb-1">Model</p><p class="text-sm font-semibold text-slate-800">RAG + Rule Engine</p></div><div><p class="text-[10px] text-slate-400 uppercase font-bold mb-1">Last Scan</p><p class="text-sm font-semibold text-slate-800">3 seconds ago</p></div></div>
-<div class="grid grid-cols-2 gap-4 bg-slate-50 p-4 rounded-xl">
-<div class="space-y-1"><p class="text-[10px] text-slate-400 font-bold">156 REGULATIONS</p><div class="h-1.5 bg-slate-200 rounded-full overflow-hidden"><div class="h-full w-full bg-blue-500 rounded-full"></div></div></div>
-<div class="space-y-1"><p class="text-[10px] text-slate-400 font-bold">99.8% COMPLIANCE</p><div class="h-1.5 bg-slate-200 rounded-full overflow-hidden"><div class="h-full w-full bg-emerald-400 rounded-full"></div></div></div>
-<div class="space-y-1"><p class="text-[10px] text-slate-400 font-bold">12 VIOLATIONS</p><div class="h-1.5 bg-slate-200 rounded-full overflow-hidden"><div class="h-full w-[10%] bg-red-400 rounded-full"></div></div></div>
-<div class="space-y-1"><p class="text-[10px] text-slate-400 font-bold">INSTANT AUDIT</p><div class="h-1.5 bg-slate-200 rounded-full overflow-hidden"><div class="h-full w-full bg-blue-500 rounded-full"></div></div></div>
-</div></div>
+<section id="agents-container" class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+    <!-- Dynamic agents will be rendered here -->
+    <div class="col-span-3 text-center py-12 text-slate-400">
+        <span class="material-symbols-outlined text-4xl animate-spin text-blue-500">sync</span>
+        <p class="mt-2 text-sm font-medium">Loading AI agents schema...</p>
+    </div>
 </section>
 <!-- Comparison & Log -->
 <section class="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -147,6 +110,69 @@
 </div>
 </section>
 </div>
+</div>
 </main>
 </div>
+<script src="api.js"></script>
+<script>
+async function loadAgents() {
+    const container = document.getElementById('agents-container');
+    try {
+        const data = await apiGet('/api/agents');
+        
+        container.innerHTML = data.agents.map(agent => {
+            const isActive = agent.status === 'Active';
+            const statusColor = isActive ? 'blue' : 'slate';
+            return `
+            <div class="glass-card rounded-2xl p-6 flex flex-col space-y-6 hover:shadow-md transition-shadow">
+                <div class="flex justify-between items-start">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-blue-500">
+                            <span class="material-symbols-outlined text-3xl">${agent.icon}</span>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-lg text-slate-900">${agent.name}</h3>
+                            <div class="flex items-center gap-2">
+                                ${isActive ? '<div class="pulse-container"><div class="pulse-ring"></div><div class="w-1.5 h-1.5 rounded-full bg-blue-500"></div></div>' : '<div class="w-1.5 h-1.5 rounded-full bg-slate-400"></div>'}
+                                <span class="text-[10px] font-bold text-${statusColor}-500 uppercase tracking-widest">${agent.status}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4 pt-4 border-t border-slate-100">
+                    <div>
+                        <p class="text-[10px] text-slate-400 uppercase font-bold mb-1">Model</p>
+                        <p class="text-sm font-semibold text-slate-800">${agent.model}</p>
+                    </div>
+                    <div>
+                        <p class="text-[10px] text-slate-400 uppercase font-bold mb-1">Last Scan</p>
+                        <p class="text-sm font-semibold text-slate-800">${agent.last_scan}</p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4 bg-slate-50 p-4 rounded-xl">
+                    <div class="space-y-1">
+                        <p class="text-[10px] text-slate-400 font-bold uppercase">${formatCurrency(agent.transactions_processed).replace('$','')} PROCESSED</p>
+                        <div class="h-1.5 bg-slate-200 rounded-full overflow-hidden"><div class="h-full w-[90%] bg-blue-500 rounded-full"></div></div>
+                    </div>
+                    <div class="space-y-1">
+                        <p class="text-[10px] text-slate-400 font-bold uppercase">${agent.accuracy}% ACC</p>
+                        <div class="h-1.5 bg-slate-200 rounded-full overflow-hidden"><div class="h-full w-[${agent.accuracy}%] bg-emerald-400 rounded-full"></div></div>
+                    </div>
+                    <div class="space-y-1">
+                        <p class="text-[10px] text-slate-400 font-bold uppercase">${agent.anomalies_detected} ANOMALIES</p>
+                        <div class="h-1.5 bg-slate-200 rounded-full overflow-hidden"><div class="h-full w-1/3 bg-red-400 rounded-full"></div></div>
+                    </div>
+                    <div class="space-y-1">
+                        <p class="text-[10px] text-slate-400 font-bold uppercase">${agent.throughput}</p>
+                        <div class="h-1.5 bg-slate-200 rounded-full overflow-hidden"><div class="h-full w-3/4 bg-cyan-400 rounded-full"></div></div>
+                    </div>
+                </div>
+            </div>`;
+        }).join('');
+    } catch (err) {
+        container.innerHTML = `<div class="col-span-3 p-8 text-center text-red-500">Failed to load agents: ${err.message}</div>`;
+    }
+}
+document.addEventListener('DOMContentLoaded', loadAgents);
+</script>
 </body></html>

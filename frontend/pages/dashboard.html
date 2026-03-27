@@ -106,6 +106,7 @@ tailwind.config = {
             <span class="absolute -top-0.5 -right-0.5 w-4 h-4 bg-red-500 text-white text-[9px] font-bold flex items-center justify-center rounded-full">4</span>
         </button>
         <div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs font-bold">JD</div>
+        <div id="api-status"></div>
     </div>
 </header>
 
@@ -198,7 +199,7 @@ tailwind.config = {
                 <span class="material-symbols-outlined text-indigo-500 text-[16px]">precision_manufacturing</span>
             </div>
         </div>
-        <p class="text-2xl font-bold text-gray-900 leading-none">99.2%</p>
+        <p id="model-accuracy" class="text-2xl font-bold text-gray-900 leading-none">99.2%</p>
         <p class="text-[11px] text-gray-400 mt-1.5">F1 Score</p>
     </div>
 </div>
@@ -427,8 +428,109 @@ tailwind.config = {
     </div>
 </div>
 
+<!-- Quick Scan Panel (connected to LSTM backend) -->
+<div class="bg-white rounded-xl border border-gray-200 p-6">
+    <div class="flex justify-between items-center mb-4">
+        <h3 class="text-sm font-semibold text-gray-900 flex items-center gap-2">
+            <span class="material-symbols-outlined text-blue-500 text-[16px]">neurology</span> LSTM Quick Scan
+        </h3>
+        <button id="quick-scan-btn" onclick="runQuickScan()" class="px-4 py-2 bg-blue-500 text-white text-xs font-bold rounded-lg hover:bg-blue-600 transition-colors shadow-sm shadow-blue-500/20">Run Quick Scan</button>
+    </div>
+    <div id="scan-results" class="min-h-[60px]">
+        <p class="text-sm text-gray-400">Click "Run Quick Scan" to test the fraud detection model on a sample transaction sequence.</p>
+    </div>
+</div>
+
 </main>
 </div>
 </div>
+<script>
+// ── FraudShield AI - Backend API Integration ──────────────────────────
+const API_BASE = window.location.origin;
+
+// Fetch live stats from the backend
+async function fetchStats() {
+    try {
+        const res = await fetch(`${API_BASE}/api/health`);
+        const data = await res.json();
+
+        // Update API status indicator
+        const statusEl = document.getElementById('api-status');
+        if (statusEl) {
+            if (data.model_loaded && data.scaler_loaded) {
+                statusEl.innerHTML = `<span class="flex items-center gap-1.5 text-[11px] text-emerald-500 font-medium">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> LSTM Model Online
+                </span>`;
+            } else {
+                statusEl.innerHTML = `<span class="flex items-center gap-1.5 text-[11px] text-amber-500 font-medium">
+                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> Model Not Loaded
+                </span>`;
+            }
+        }
+
+        // Update model accuracy KPI from /api/stats
+        const statsRes = await fetch(`${API_BASE}/api/stats`);
+        const stats = await statsRes.json();
+        const accEl = document.getElementById('model-accuracy');
+        if (accEl) {
+            accEl.textContent = `${(stats.model_accuracy * 100).toFixed(1)}%`;
+        }
+    } catch (err) {
+        const statusEl = document.getElementById('api-status');
+        if (statusEl) {
+            statusEl.innerHTML = `<span class="flex items-center gap-1.5 text-[11px] text-red-400 font-medium">
+                <span class="w-1.5 h-1.5 rounded-full bg-red-400"></span> API Offline
+            </span>`;
+        }
+    }
+}
+
+// Run a quick fraud check demo on the dashboard
+async function runQuickScan() {
+    const btn = document.getElementById('quick-scan-btn');
+    const resultsEl = document.getElementById('scan-results');
+    if (!btn || !resultsEl) return;
+
+    btn.disabled = true;
+    btn.textContent = 'Scanning...';
+    resultsEl.innerHTML = '<p class="text-sm text-slate-400 animate-pulse">Running LSTM model prediction...</p>';
+
+    try {
+        const res = await fetch(`${API_BASE}/api/predict`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                sequence: [
+                    [150.0, 315.0], [22.5, 315.0], [89.99, 315.0],
+                    [450.0, 204.0], [12.0, 315.0], [67.5, 315.0],
+                    [200.0, 315.0], [33.0, 315.0], [99.0, 315.0],
+                    [1500.0, 100.0]
+                ]
+            })
+        });
+        const data = await res.json();
+        const color = data.is_fraud ? 'red' : 'emerald';
+        const label = data.is_fraud ? 'FRAUD DETECTED' : 'LEGITIMATE';
+        resultsEl.innerHTML = `
+            <div class="flex items-center justify-between mb-2">
+                <span class="px-2.5 py-1 rounded-full bg-${color}-50 text-${color}-600 text-[10px] font-black uppercase border border-${color}-100">${label}</span>
+                <span class="text-lg font-bold text-slate-900">${(data.fraud_probability * 100).toFixed(1)}%</span>
+            </div>
+            <div class="space-y-1">
+                ${data.reasons.map(r => `<p class="text-[11px] text-slate-500 flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-amber-400" style="font-size:12px">warning</span> ${r}
+                </p>`).join('')}
+            </div>`;
+    } catch (err) {
+        resultsEl.innerHTML = '<p class="text-sm text-red-400">API unreachable. Start the backend server.</p>';
+    }
+
+    btn.disabled = false;
+    btn.textContent = 'Run Quick Scan';
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', fetchStats);
+</script>
 </body>
 </html>
