@@ -1,17 +1,16 @@
 <!DOCTYPE html>
-<html lang="en"><head>
+<html lang="en">
+<head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Analytics & Insights | FraudShield AI</title>
+<title>Analytics | FraudShield AI</title>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
 <script>
-    tailwind.config = { theme: { extend: {
-        colors: { "primary":"#3b82f6","primary-container":"#dbeafe","on-primary":"#ffffff","secondary":"#06b6d4","secondary-container":"#cffafe","tertiary":"#f59e0b","tertiary-container":"#fef3c7","error":"#ef4444","error-container":"#fee2e2","on-error":"#ffffff","on-error-container":"#991b1b","surface":"#ffffff","on-surface":"#0f172a","on-surface-variant":"#64748b","background":"#f8fafc","outline":"#cbd5e1","outline-variant":"#e2e8f0","surface-container-lowest":"#ffffff","surface-container-low":"#f8fafc","surface-container":"#f1f5f9","surface-container-high":"#e2e8f0","surface-container-highest":"#e2e8f0","surface-variant":"#f1f5f9","on-background":"#0f172a" },
-        fontFamily: { "headline":["Inter"],"body":["Inter"],"label":["Inter"] },
-        borderRadius: {"DEFAULT":"0.5rem","lg":"0.75rem","xl":"1rem","full":"9999px"},
-    }}};
+tailwind.config = { theme: { extend: {
+    fontFamily: { sans: ['Inter', 'sans-serif'] },
+}}};
 </script>
 <style>
     .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; vertical-align: middle; }
@@ -21,146 +20,262 @@
 </head>
 <body class="antialiased">
 <div class="flex min-h-screen">
-<aside class="flex flex-col sticky top-0 h-screen w-64 border-r border-slate-200 bg-white text-sm z-50">
-<div class="p-6 flex items-center gap-3">
-<div class="w-9 h-9 rounded-xl bg-blue-500 flex items-center justify-center shadow-lg shadow-blue-500/20"><span class="material-symbols-outlined text-white" style="font-variation-settings: 'FILL' 1;">security</span></div>
-<div><h1 class="text-lg font-black tracking-tight text-slate-900">FraudShield AI</h1><p class="text-[10px] uppercase tracking-widest text-blue-500 font-bold">The Sentient Shield</p></div>
-</div>
-<nav class="flex-1 px-3 py-6 space-y-1">
-<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition-all rounded-xl" href="dashboard.html"><span class="material-symbols-outlined">dashboard</span> Dashboard</a>
-<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition-all rounded-xl" href="transactions.html"><span class="material-symbols-outlined">payments</span> Transactions</a>
-<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition-all rounded-xl" href="alerts.html"><span class="material-symbols-outlined">notification_important</span> Alerts</a>
-<a class="flex items-center gap-3 px-4 py-3 bg-blue-50 text-blue-600 rounded-xl font-medium" href="analytics.html"><span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">analytics</span> Analytics</a>
-<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition-all rounded-xl" href="ai-agents.html"><span class="material-symbols-outlined">memory</span> AI Agents</a>
-<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition-all rounded-xl" href="settings.html"><span class="material-symbols-outlined">settings</span> Settings</a>
-</nav>
-<div class="p-4 border-t border-slate-100">
-<button class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-4 rounded-xl text-sm active:scale-[0.98] transition-all shadow-lg shadow-blue-500/20">Generate Report</button>
-<a class="flex items-center gap-3 px-4 py-3 mt-3 text-slate-400 hover:text-slate-600 transition-all" href="#"><span class="material-symbols-outlined">help_outline</span> Support</a>
-</div>
+
+<!-- Sidebar -->
+<aside class="flex flex-col sticky top-0 h-screen w-56 border-r border-slate-200 bg-white text-sm z-50 flex-shrink-0">
+    <div class="px-5 py-5 flex items-center gap-3">
+        <div class="w-8 h-8 rounded-lg bg-blue-500 flex items-center justify-center shadow-md shadow-blue-500/20">
+            <span class="material-symbols-outlined text-white text-lg" style="font-variation-settings: 'FILL' 1;">shield</span>
+        </div>
+        <div>
+            <h1 class="text-sm font-bold text-slate-900 leading-tight">FraudShield</h1>
+            <p class="text-[10px] text-slate-400 leading-tight">Detection System</p>
+        </div>
+    </div>
+    <nav class="flex-1 px-3 mt-4 space-y-0.5 overflow-y-auto">
+        <a href="dashboard.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-500 hover:bg-slate-50 hover:text-slate-800 text-[13px] transition-colors">
+            <span class="material-symbols-outlined text-lg">dashboard</span> Dashboard
+        </a>
+        <a href="transactions.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-500 hover:bg-slate-50 hover:text-slate-800 text-[13px] transition-colors">
+            <span class="material-symbols-outlined text-lg">swap_horiz</span> Transactions
+        </a>
+        <a href="alerts.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-500 hover:bg-slate-50 hover:text-slate-800 text-[13px] transition-colors">
+            <span class="material-symbols-outlined text-lg">notifications</span> Alerts
+        </a>
+        <a href="analytics.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-blue-50 text-blue-600 text-[13px] font-medium">
+            <span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 1;">analytics</span> Analytics
+        </a>
+        <a href="ai-agents.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-500 hover:bg-slate-50 hover:text-slate-800 text-[13px] transition-colors">
+            <span class="material-symbols-outlined text-lg">memory</span> AI Agents
+        </a>
+    </nav>
 </aside>
+
+<!-- Main -->
 <main class="flex-1 bg-slate-50/50 overflow-x-hidden">
-<header class="flex justify-between items-center px-8 sticky top-0 z-50 w-full h-16 border-b border-slate-100 bg-white/80 backdrop-blur-xl">
-<div class="relative w-full max-w-md"><span class="absolute inset-y-0 left-3 flex items-center text-slate-400"><span class="material-symbols-outlined text-lg">search</span></span><input class="w-full bg-slate-100 border-none rounded-xl py-2.5 pl-10 pr-4 text-sm focus:ring-2 focus:ring-blue-500/20 placeholder:text-slate-400" placeholder="Search analytics..." type="text"/></div>
-<div class="flex items-center gap-4">
-<button class="p-2 text-slate-400 hover:text-blue-500 transition-colors relative"><span class="material-symbols-outlined">notifications</span><span class="absolute -top-0 -right-0 w-4 h-4 bg-red-500 text-white font-bold text-[9px] flex items-center justify-center rounded-full">3</span></button>
-<div class="h-8 w-px bg-slate-100 mx-2"></div>
-<div class="flex items-center gap-3"><span class="text-xs font-medium text-right hidden sm:block"><span class="block text-slate-800">Alex Rivera</span><span class="block text-slate-400">Security Lead</span></span><div class="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center text-white font-bold text-xs shadow-lg shadow-blue-500/20">AR</div></div>
-</div>
+<header class="flex items-center px-8 sticky top-0 z-50 w-full h-14 border-b border-slate-100 bg-white/80 backdrop-blur-xl">
+    <h2 class="text-sm font-semibold text-slate-900">Analytics & Insights</h2>
 </header>
+
 <div class="p-8 space-y-8">
-<div class="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
-<div><h2 class="text-3xl font-extrabold tracking-tight text-slate-900 mb-2">Analytics & Insights</h2><div class="flex items-center gap-2 text-slate-400"><div class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div><span class="text-sm font-medium">AI-powered fraud intelligence reports</span></div></div>
-<div class="flex gap-3">
-<div class="bg-white px-3 py-2 rounded-xl flex items-center gap-2 border border-slate-200 shadow-sm"><span class="material-symbols-outlined text-sm text-slate-400">calendar_today</span><span class="text-sm text-slate-600">Last 30 Days</span></div>
-<button class="px-4 py-2 bg-blue-500 text-white font-bold rounded-xl text-sm flex items-center gap-2 shadow-lg shadow-blue-500/20 hover:bg-blue-600"><span class="material-symbols-outlined text-sm">download</span> Export Report</button>
+
+<!-- Title -->
+<div>
+    <h2 class="text-2xl font-extrabold tracking-tight text-slate-900 mb-1">Analytics & Insights</h2>
+    <p class="text-slate-400 text-sm">Data computed from the IEEE-CIS fraud detection dataset</p>
 </div>
+
+<!-- KPI Cards (from /api/analytics overview) -->
+<div id="kpi-cards" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 animate-pulse"><div class="h-20 bg-slate-100 rounded"></div></div>
+    <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 animate-pulse"><div class="h-20 bg-slate-100 rounded"></div></div>
+    <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 animate-pulse"><div class="h-20 bg-slate-100 rounded"></div></div>
+    <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 animate-pulse"><div class="h-20 bg-slate-100 rounded"></div></div>
 </div>
-<!-- KPI Cards -->
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-<div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 relative overflow-hidden group hover:shadow-md transition-shadow">
-<div class="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity"><span class="material-symbols-outlined text-5xl">trending_up</span></div>
-<p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Fraud Prevention Rate</p>
-<h3 id="stat-prevention-rate" class="text-3xl font-black tracking-tighter text-blue-500">...</h3>
-<div class="mt-4 flex items-center gap-2"><span class="text-emerald-600 text-[10px] font-bold bg-emerald-50 px-1.5 py-0.5 rounded-md border border-emerald-100">+0.3%</span><span class="text-[10px] text-slate-400">vs last month</span></div>
-</div>
-<div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 relative overflow-hidden group hover:shadow-md transition-shadow">
-<div class="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity"><span class="material-symbols-outlined text-5xl text-cyan-500">savings</span></div>
-<p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Capital Protected</p>
-<h3 id="stat-capital-protected" class="text-3xl font-black tracking-tighter text-cyan-500">...</h3>
-<div class="mt-4 flex items-center gap-2"><span class="text-emerald-600 text-[10px] font-bold bg-emerald-50 px-1.5 py-0.5 rounded-md border border-emerald-100">+18%</span><span class="text-[10px] text-slate-400">this quarter</span></div>
-</div>
-<div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 relative overflow-hidden group hover:shadow-md transition-shadow">
-<div class="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity"><span class="material-symbols-outlined text-5xl text-amber-500">speed</span></div>
-<p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Avg Detection Speed</p>
-<h3 id="stat-detection-speed" class="text-3xl font-black tracking-tighter text-amber-500">...</h3>
-<div class="mt-4 flex items-center gap-2"><span class="text-emerald-600 text-[10px] font-bold bg-emerald-50 px-1.5 py-0.5 rounded-md border border-emerald-100">-0.3ms</span><span class="text-[10px] text-slate-400">faster</span></div>
-</div>
-<div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 relative overflow-hidden group hover:shadow-md transition-shadow">
-<div class="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity"><span class="material-symbols-outlined text-5xl text-red-500">bug_report</span></div>
-<p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">False Positive Rate</p>
-<h3 id="stat-false-positive-rate" class="text-3xl font-black tracking-tighter text-red-500">...</h3>
-<div class="mt-4 flex items-center gap-2"><span class="text-emerald-600 text-[10px] font-bold bg-emerald-50 px-1.5 py-0.5 rounded-md border border-emerald-100">-0.2%</span><span class="text-[10px] text-slate-400">improved</span></div>
-</div>
-</div>
-<!-- Charts -->
+
+<!-- Charts Row -->
 <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-<div class="lg:col-span-8 bg-white rounded-2xl p-8 shadow-sm border border-slate-100">
-<div class="flex justify-between items-end mb-8"><div><h3 class="text-lg font-bold text-slate-900">Fraud Detection Trend</h3><p class="text-sm text-slate-400">30-day rolling analysis</p></div>
-<div class="flex gap-2"><span class="bg-slate-100 text-slate-500 text-[10px] px-3 py-1 rounded-lg font-bold cursor-pointer hover:bg-slate-200">7D</span><span class="bg-blue-50 text-blue-600 text-[10px] px-3 py-1 rounded-lg font-bold border border-blue-100">30D</span><span class="bg-slate-100 text-slate-500 text-[10px] px-3 py-1 rounded-lg font-bold cursor-pointer hover:bg-slate-200">90D</span></div></div>
-<div class="h-64 w-full relative">
-<svg class="w-full h-full" preserveAspectRatio="none" viewBox="0 0 800 200">
-<defs><linearGradient id="areaGrad" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" style="stop-color:#3b82f6;stop-opacity:0.15"/><stop offset="100%" style="stop-color:#3b82f6;stop-opacity:0"/></linearGradient><linearGradient id="areaGrad2" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" style="stop-color:#ef4444;stop-opacity:0.1"/><stop offset="100%" style="stop-color:#ef4444;stop-opacity:0"/></linearGradient></defs>
-<line x1="0" y1="50" x2="800" y2="50" stroke="#e2e8f0" stroke-width="0.5" stroke-dasharray="4"/><line x1="0" y1="100" x2="800" y2="100" stroke="#e2e8f0" stroke-width="0.5" stroke-dasharray="4"/><line x1="0" y1="150" x2="800" y2="150" stroke="#e2e8f0" stroke-width="0.5" stroke-dasharray="4"/>
-<path d="M0,180 Q50,175 100,170 T200,160 T300,155 T400,140 T500,130 T600,120 T700,115 T800,105 L800,200 L0,200 Z" fill="url(#areaGrad)"/>
-<path d="M0,180 Q50,175 100,170 T200,160 T300,155 T400,140 T500,130 T600,120 T700,115 T800,105" fill="none" stroke="#3b82f6" stroke-width="2.5"/>
-<path d="M0,190 Q100,188 200,185 T400,178 T500,182 T600,175 T700,172 T800,168 L800,200 L0,200 Z" fill="url(#areaGrad2)"/>
-<path d="M0,190 Q100,188 200,185 T400,178 T500,182 T600,175 T700,172 T800,168" fill="none" stroke="#ef4444" stroke-width="2"/>
-<circle cx="500" cy="130" r="5" fill="#3b82f6"/><circle cx="500" cy="182" r="4" fill="#ef4444"/>
-</svg>
-<div class="absolute bottom-0 left-0 w-full flex justify-between px-4 text-[10px] text-slate-300"><span>Sep 20</span><span>Sep 25</span><span>Oct 1</span><span>Oct 5</span><span>Oct 10</span><span>Oct 15</span><span>Oct 19</span></div>
+    <!-- Daily Trend -->
+    <div class="lg:col-span-7 bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+        <h3 class="text-sm font-bold text-slate-900 mb-6">Fraud Rate by Period</h3>
+        <div id="trend-chart" class="h-56 flex items-center justify-center">
+            <p class="text-sm text-slate-400 animate-pulse">Loading...</p>
+        </div>
+    </div>
+    <!-- Fraud by Product -->
+    <div class="lg:col-span-5 bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+        <h3 class="text-sm font-bold text-slate-900 mb-6">Fraud by Product Type</h3>
+        <div id="product-chart" class="space-y-4">
+            <p class="text-sm text-slate-400 animate-pulse">Loading...</p>
+        </div>
+    </div>
 </div>
-<div class="mt-6 flex gap-6"><div class="flex items-center gap-2"><div class="w-3 h-0.5 bg-blue-500 rounded"></div><span class="text-[10px] font-bold text-slate-400">Detected Threats</span></div><div class="flex items-center gap-2"><div class="w-3 h-0.5 bg-red-400 rounded"></div><span class="text-[10px] font-bold text-slate-400">Confirmed Fraud</span></div></div>
+
+<!-- Amount Distribution + Top Fraud Cards -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+    <!-- Amount Distribution -->
+    <div class="lg:col-span-7 bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+        <h3 class="text-sm font-bold text-slate-900 mb-6">Transaction Amount Distribution</h3>
+        <div id="amount-chart" class="h-48 flex items-center justify-center">
+            <p class="text-sm text-slate-400 animate-pulse">Loading...</p>
+        </div>
+    </div>
+    <!-- Top Fraud Cards -->
+    <div class="lg:col-span-5 bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+        <h3 class="text-sm font-bold text-slate-900 mb-6">Top Fraud-Associated Cards</h3>
+        <div id="fraud-cards" class="space-y-3">
+            <p class="text-sm text-slate-400 animate-pulse">Loading...</p>
+        </div>
+    </div>
 </div>
-<div class="lg:col-span-4 bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
-<h3 class="text-lg font-bold text-slate-900 mb-6">Fraud by Type</h3>
-<div class="space-y-5">
-<div><div class="flex justify-between items-center mb-2"><span class="text-sm text-slate-700">Account Takeover</span><span class="text-xs font-bold text-red-500">34%</span></div><div class="h-2 bg-slate-100 rounded-full overflow-hidden"><div class="h-full bg-red-400 rounded-full" style="width:34%"></div></div></div>
-<div><div class="flex justify-between items-center mb-2"><span class="text-sm text-slate-700">Card Fraud</span><span class="text-xs font-bold text-amber-500">28%</span></div><div class="h-2 bg-slate-100 rounded-full overflow-hidden"><div class="h-full bg-amber-400 rounded-full" style="width:28%"></div></div></div>
-<div><div class="flex justify-between items-center mb-2"><span class="text-sm text-slate-700">Wire Fraud</span><span class="text-xs font-bold text-blue-500">22%</span></div><div class="h-2 bg-slate-100 rounded-full overflow-hidden"><div class="h-full bg-blue-400 rounded-full" style="width:22%"></div></div></div>
-<div><div class="flex justify-between items-center mb-2"><span class="text-sm text-slate-700">Identity Fraud</span><span class="text-xs font-bold text-cyan-500">10%</span></div><div class="h-2 bg-slate-100 rounded-full overflow-hidden"><div class="h-full bg-cyan-400 rounded-full" style="width:10%"></div></div></div>
-<div><div class="flex justify-between items-center mb-2"><span class="text-sm text-slate-700">Other</span><span class="text-xs font-bold text-slate-400">6%</span></div><div class="h-2 bg-slate-100 rounded-full overflow-hidden"><div class="h-full bg-slate-300 rounded-full" style="width:6%"></div></div></div>
-</div>
-</div>
-</div>
-<!-- Bottom -->
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+<!-- Fraud Amount Statistics -->
 <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
-<h3 class="text-lg font-bold text-slate-900 mb-6">Geographic Hotspots</h3>
-<div class="space-y-4">
-<div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100"><div class="flex items-center gap-3"><span class="text-lg">🇺🇸</span><div><p class="text-sm font-semibold text-slate-800">United States</p><p class="text-[10px] text-slate-400">2,145 flagged</p></div></div><span class="text-sm font-bold text-emerald-500">Low Risk</span></div>
-<div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100"><div class="flex items-center gap-3"><span class="text-lg">🇷🇺</span><div><p class="text-sm font-semibold text-slate-800">Russia</p><p class="text-[10px] text-slate-400">892 flagged</p></div></div><span class="text-sm font-bold text-red-500">High Risk</span></div>
-<div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100"><div class="flex items-center gap-3"><span class="text-lg">🇳🇬</span><div><p class="text-sm font-semibold text-slate-800">Nigeria</p><p class="text-[10px] text-slate-400">654 flagged</p></div></div><span class="text-sm font-bold text-red-500">High Risk</span></div>
-<div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100"><div class="flex items-center gap-3"><span class="text-lg">🇬🇧</span><div><p class="text-sm font-semibold text-slate-800">United Kingdom</p><p class="text-[10px] text-slate-400">423 flagged</p></div></div><span class="text-sm font-bold text-amber-500">Medium</span></div>
-<div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100"><div class="flex items-center gap-3"><span class="text-lg">🇰🇾</span><div><p class="text-sm font-semibold text-slate-800">Cayman Islands</p><p class="text-[10px] text-slate-400">312 flagged</p></div></div><span class="text-sm font-bold text-red-500">Critical</span></div>
+    <h3 class="text-sm font-bold text-slate-900 mb-6">Fraud Transaction Amount Statistics</h3>
+    <div id="fraud-stats" class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="animate-pulse"><div class="h-16 bg-slate-100 rounded"></div></div>
+        <div class="animate-pulse"><div class="h-16 bg-slate-100 rounded"></div></div>
+        <div class="animate-pulse"><div class="h-16 bg-slate-100 rounded"></div></div>
+        <div class="animate-pulse"><div class="h-16 bg-slate-100 rounded"></div></div>
+    </div>
 </div>
-</div>
-<div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
-<h3 class="text-lg font-bold text-slate-900 mb-6">AI Model Performance</h3>
-<div class="space-y-6">
-<div class="grid grid-cols-3 gap-4 text-center">
-<div class="bg-slate-50 p-4 rounded-xl border border-slate-100"><p class="text-2xl font-black text-blue-500">99.7%</p><p class="text-[10px] text-slate-400 uppercase font-bold mt-1">Accuracy</p></div>
-<div class="bg-slate-50 p-4 rounded-xl border border-slate-100"><p class="text-2xl font-black text-cyan-500">98.2%</p><p class="text-[10px] text-slate-400 uppercase font-bold mt-1">Precision</p></div>
-<div class="bg-slate-50 p-4 rounded-xl border border-slate-100"><p class="text-2xl font-black text-amber-500">97.8%</p><p class="text-[10px] text-slate-400 uppercase font-bold mt-1">Recall</p></div>
-</div>
-<div class="p-4 bg-blue-50 rounded-xl border border-blue-100"><div class="text-xs font-bold text-blue-600 mb-2 flex items-center gap-2"><span class="material-symbols-outlined text-sm">bolt</span> AI Recommendation</div><p class="text-[11px] text-slate-500 leading-relaxed">Consider retraining the Behavioral Analysis model with Q4 data. Detection rates for card-not-present transactions could improve by ~2.1%.</p></div>
-<div class="space-y-3">
-<div class="flex items-center justify-between"><span class="text-sm text-slate-700">Pattern Analysis</span><div class="flex items-center gap-2"><div class="w-24 h-1.5 bg-slate-100 rounded-full overflow-hidden"><div class="h-full bg-blue-500 rounded-full" style="width:98.9%"></div></div><span class="text-xs font-bold text-blue-500">98.9%</span></div></div>
-<div class="flex items-center justify-between"><span class="text-sm text-slate-700">Behavioral AI</span><div class="flex items-center gap-2"><div class="w-24 h-1.5 bg-slate-100 rounded-full overflow-hidden"><div class="h-full bg-cyan-400 rounded-full" style="width:97.2%"></div></div><span class="text-xs font-bold text-cyan-500">97.2%</span></div></div>
-<div class="flex items-center justify-between"><span class="text-sm text-slate-700">Compliance Agent</span><div class="flex items-center gap-2"><div class="w-24 h-1.5 bg-slate-100 rounded-full overflow-hidden"><div class="h-full bg-amber-400 rounded-full" style="width:99.8%"></div></div><span class="text-xs font-bold text-amber-500">99.8%</span></div></div>
-</div>
-</div>
-</div>
-</div>
-</div>
+
 </div>
 </main>
 </div>
+
 <script src="api.js"></script>
 <script>
 async function loadAnalytics() {
     try {
         const data = await apiGet('/api/analytics');
-        
-        document.getElementById('stat-prevention-rate').textContent = `${data.kpis.prevention_rate_pct}%`;
-        document.getElementById('stat-capital-protected').textContent = formatCurrency(data.kpis.capital_protected);
-        document.getElementById('stat-detection-speed').textContent = `${data.kpis.avg_detection_speed_ms}ms`;
-        document.getElementById('stat-false-positive-rate').textContent = `${data.kpis.false_positive_rate_pct}%`;
-        
+        const ov = data.overview;
+
+        // KPI Cards
+        const kpis = [
+            { label: 'Fraud Rate', value: `${ov.fraud_rate}%`, icon: 'trending_up', color: 'red' },
+            { label: 'Total Fraud Amount', value: formatCurrency(ov.total_fraud_amount), icon: 'payments', color: 'amber' },
+            { label: 'Model Accuracy', value: `${ov.model_accuracy}%`, icon: 'precision_manufacturing', color: 'blue' },
+            { label: 'False Positive Rate', value: `${ov.false_positive_rate}%`, icon: 'bug_report', color: 'slate' },
+        ];
+
+        document.getElementById('kpi-cards').innerHTML = kpis.map(k => `
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 relative overflow-hidden group hover:shadow-md transition-shadow">
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">${k.label}</p>
+                <h3 class="text-3xl font-black tracking-tighter text-${k.color}-500">${k.value}</h3>
+                <div class="mt-3 grid grid-cols-2 gap-2 text-[10px] text-slate-400">
+                    <span>Total Fraud: ${ov.total_fraud.toLocaleString()}</span>
+                    <span>Total Txn: ${ov.total_transactions.toLocaleString()}</span>
+                </div>
+            </div>`).join('');
+
+        // Additional overview stats row
+        const row2 = [
+            { label: 'Avg Fraud Amount', value: `$${ov.avg_fraud_amount.toFixed(2)}` },
+            { label: 'Avg Legit Amount', value: `$${ov.avg_legit_amount.toFixed(2)}` },
+        ];
+        document.getElementById('kpi-cards').innerHTML += row2.map(k => `
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">${k.label}</p>
+                <h3 class="text-2xl font-bold text-slate-800">${k.value}</h3>
+            </div>`).join('');
+
+        // Daily Trend Chart
+        const trend = data.daily_trend;
+        const maxFraudRate = Math.max(...trend.map(d => d.fraud_rate));
+        const maxTotal = Math.max(...trend.map(d => d.total));
+        const barMaxH = 180;
+
+        document.getElementById('trend-chart').innerHTML = `
+            <div class="w-full">
+                <div class="flex items-end gap-3" style="height:${barMaxH}px">
+                    ${trend.map(d => {
+                        const h = Math.max(8, Math.round((d.total / maxTotal) * barMaxH));
+                        return `
+                        <div class="flex-1 flex flex-col items-center justify-end h-full">
+                            <span class="text-[9px] text-red-400 font-semibold mb-1">${d.fraud_rate}%</span>
+                            <span class="text-[9px] text-slate-400 mb-1">${d.total.toLocaleString()}</span>
+                            <div class="w-full bg-blue-400 rounded-t relative" style="height:${h}px">
+                                <div class="absolute bottom-0 w-full bg-red-400 rounded-t" style="height:${Math.max(2, Math.round((d.fraud / d.total) * h))}px"></div>
+                            </div>
+                        </div>`;
+                    }).join('')}
+                </div>
+                <div class="flex gap-3 mt-2 border-t border-slate-100 pt-2">
+                    ${trend.map(d => `<div class="flex-1 text-center text-[10px] text-slate-400">${d.day}</div>`).join('')}
+                </div>
+                <div class="flex gap-6 mt-3">
+                    <div class="flex items-center gap-2"><div class="w-3 h-2 bg-blue-400 rounded"></div><span class="text-[10px] text-slate-400">Total</span></div>
+                    <div class="flex items-center gap-2"><div class="w-3 h-2 bg-red-400 rounded"></div><span class="text-[10px] text-slate-400">Fraud</span></div>
+                </div>
+            </div>`;
+
+        // Fraud by Product Type
+        const products = data.fraud_by_product;
+        const totals = data.total_by_product;
+        const maxProd = Math.max(...Object.values(products));
+        const productNames = { W: 'W (Travel)', C: 'C (Digital)', R: 'R (Return)', H: 'H (Hotel)', S: 'S (Subscription)' };
+
+        document.getElementById('product-chart').innerHTML = Object.entries(products)
+            .sort((a, b) => b[1] - a[1])
+            .map(([key, fraudCount]) => {
+                const total = totals[key] || 1;
+                const rate = ((fraudCount / total) * 100).toFixed(1);
+                const barW = Math.round((fraudCount / maxProd) * 100);
+                return `
+                <div>
+                    <div class="flex justify-between items-center mb-1.5">
+                        <span class="text-sm font-medium text-slate-700">Product ${productNames[key] || key}</span>
+                        <span class="text-xs text-slate-400">${fraudCount} fraud / ${total.toLocaleString()} total (${rate}%)</span>
+                    </div>
+                    <div class="h-2 bg-slate-100 rounded-full overflow-hidden">
+                        <div class="h-full bg-blue-400 rounded-full" style="width:${barW}%"></div>
+                    </div>
+                </div>`;
+            }).join('');
+
+        // Amount Distribution
+        const amountDist = data.amount_distribution;
+        const maxAmt = Math.max(...Object.values(amountDist));
+        const amtBarMaxH = 140;
+
+        document.getElementById('amount-chart').innerHTML = `
+            <div class="w-full">
+                <div class="flex items-end gap-2" style="height:${amtBarMaxH}px">
+                    ${Object.entries(amountDist).map(([range, count]) => {
+                        const h = Math.max(4, Math.round((count / maxAmt) * amtBarMaxH));
+                        return `
+                        <div class="flex-1 flex flex-col items-center justify-end h-full">
+                            <span class="text-[8px] text-slate-400 mb-1">${count.toLocaleString()}</span>
+                            <div class="w-full bg-indigo-400 rounded-t hover:bg-indigo-500 transition-colors" style="height:${h}px"></div>
+                        </div>`;
+                    }).join('')}
+                </div>
+                <div class="flex gap-2 mt-2 border-t border-slate-100 pt-2">
+                    ${Object.keys(amountDist).map(r => `<div class="flex-1 text-center text-[9px] text-slate-400">${r}</div>`).join('')}
+                </div>
+            </div>`;
+
+        // Top Fraud Cards
+        const topCards = data.top_fraud_cards;
+        document.getElementById('fraud-cards').innerHTML = Object.entries(topCards)
+            .map(([card, count], i) => `
+                <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center text-red-500 text-xs font-bold">#${i+1}</div>
+                        <div>
+                            <p class="text-sm font-semibold text-slate-800">Card ${card}</p>
+                            <p class="text-[10px] text-slate-400">card1 identifier</p>
+                        </div>
+                    </div>
+                    <span class="text-sm font-bold text-red-500">${count} frauds</span>
+                </div>`).join('');
+
+        // Fraud Amount Stats
+        const fStats = data.fraud_amount_stats;
+        const statItems = [
+            { label: 'Count', value: fStats.count?.toLocaleString() || '—' },
+            { label: 'Mean', value: `$${fStats.mean?.toFixed(2) || '—'}` },
+            { label: 'Std Dev', value: `$${fStats.std?.toFixed(2) || '—'}` },
+            { label: 'Min', value: `$${fStats.min?.toFixed(2) || '—'}` },
+            { label: '25th Pctl', value: `$${fStats['25%']?.toFixed(2) || '—'}` },
+            { label: 'Median', value: `$${fStats['50%']?.toFixed(2) || '—'}` },
+            { label: '75th Pctl', value: `$${fStats['75%']?.toFixed(2) || '—'}` },
+            { label: 'Max', value: `$${fStats.max?.toFixed(2) || '—'}` },
+        ];
+
+        document.getElementById('fraud-stats').innerHTML = statItems.map(s => `
+            <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 text-center">
+                <p class="text-xl font-bold text-slate-800">${s.value}</p>
+                <p class="text-[10px] text-slate-400 uppercase font-bold mt-1">${s.label}</p>
+            </div>`).join('');
+
     } catch (err) {
-        console.error("Failed to load analytics: ", err);
+        console.error("Failed to load analytics:", err);
+        document.getElementById('kpi-cards').innerHTML = `<div class="col-span-4 p-8 text-center text-red-500">Failed to load analytics: ${err.message}</div>`;
     }
 }
+
 document.addEventListener('DOMContentLoaded', loadAnalytics);
 </script>
 </body></html>

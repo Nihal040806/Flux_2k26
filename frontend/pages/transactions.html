@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="en"><head>
+<html lang="en">
+<head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>Transactions | FraudShield AI</title>
@@ -7,22 +8,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
 <script>
-    tailwind.config = {
-        theme: { extend: {
-            colors: {
-                "primary":"#3b82f6","primary-container":"#dbeafe","on-primary":"#ffffff","on-primary-container":"#1e40af",
-                "secondary":"#06b6d4","secondary-container":"#cffafe","on-secondary":"#ffffff","on-secondary-container":"#155e75",
-                "tertiary":"#f59e0b","tertiary-container":"#fef3c7","on-tertiary":"#ffffff","on-tertiary-container":"#92400e",
-                "error":"#ef4444","error-container":"#fee2e2","on-error":"#ffffff","on-error-container":"#991b1b",
-                "surface":"#ffffff","surface-dim":"#f1f5f9","surface-container-lowest":"#ffffff","surface-container-low":"#f8fafc",
-                "surface-container":"#f1f5f9","surface-container-high":"#e2e8f0","surface-container-highest":"#e2e8f0",
-                "surface-variant":"#f1f5f9","on-surface":"#0f172a","on-surface-variant":"#64748b","background":"#f8fafc",
-                "outline":"#cbd5e1","outline-variant":"#e2e8f0","on-background":"#0f172a","surface-bright":"#ffffff"
-            },
-            fontFamily: { "headline":["Inter"],"body":["Inter"],"label":["Inter"] },
-            borderRadius: {"DEFAULT":"0.5rem","lg":"0.75rem","xl":"1rem","full":"9999px"},
-        }},
-    }
+tailwind.config = { theme: { extend: {
+    fontFamily: { sans: ['Inter', 'sans-serif'] },
+}}};
 </script>
 <style>
     .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; vertical-align: middle; }
@@ -36,155 +24,107 @@
 </head>
 <body class="antialiased">
 <div class="flex min-h-screen">
-<!-- SideNavBar -->
-<aside class="flex flex-col sticky top-0 h-screen w-64 border-r border-slate-200 bg-white text-sm z-50">
-<div class="p-6 flex items-center gap-3">
-<div class="w-9 h-9 rounded-xl bg-blue-500 flex items-center justify-center shadow-lg shadow-blue-500/20">
-<span class="material-symbols-outlined text-white" style="font-variation-settings: 'FILL' 1;">security</span>
-</div>
-<div>
-<h1 class="text-lg font-black tracking-tight text-slate-900">FraudShield AI</h1>
-<p class="text-[10px] uppercase tracking-widest text-blue-500 font-bold">The Sentient Shield</p>
-</div>
-</div>
-<nav class="flex-1 px-3 py-6 space-y-1">
-<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition-all duration-200 rounded-xl" href="dashboard.html"><span class="material-symbols-outlined">dashboard</span> Dashboard</a>
-<a class="flex items-center gap-3 px-4 py-3 bg-blue-50 text-blue-600 rounded-xl font-medium" href="transactions.html"><span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">payments</span> Transactions</a>
-<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition-all duration-200 rounded-xl" href="alerts.html"><span class="material-symbols-outlined">notification_important</span> Alerts</a>
-<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition-all duration-200 rounded-xl" href="analytics.html"><span class="material-symbols-outlined">analytics</span> Analytics</a>
-<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition-all duration-200 rounded-xl" href="ai-agents.html"><span class="material-symbols-outlined">memory</span> AI Agents</a>
-<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition-all duration-200 rounded-xl" href="settings.html"><span class="material-symbols-outlined">settings</span> Settings</a>
-</nav>
-<div class="p-4 border-t border-slate-100">
-<button class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-4 rounded-xl text-sm active:scale-[0.98] transition-all shadow-lg shadow-blue-500/20">Generate Report</button>
-<a class="flex items-center gap-3 px-4 py-3 mt-3 text-slate-400 hover:text-slate-600 transition-all duration-200" href="#"><span class="material-symbols-outlined">help_outline</span> Support</a>
-</div>
+
+<!-- Sidebar -->
+<aside class="flex flex-col sticky top-0 h-screen w-56 border-r border-slate-200 bg-white text-sm z-50 flex-shrink-0">
+    <div class="px-5 py-5 flex items-center gap-3">
+        <div class="w-8 h-8 rounded-lg bg-blue-500 flex items-center justify-center shadow-md shadow-blue-500/20">
+            <span class="material-symbols-outlined text-white text-lg" style="font-variation-settings: 'FILL' 1;">shield</span>
+        </div>
+        <div>
+            <h1 class="text-sm font-bold text-slate-900 leading-tight">FraudShield</h1>
+            <p class="text-[10px] text-slate-400 leading-tight">Detection System</p>
+        </div>
+    </div>
+    <nav class="flex-1 px-3 mt-4 space-y-0.5 overflow-y-auto">
+        <a href="dashboard.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-500 hover:bg-slate-50 hover:text-slate-800 text-[13px] transition-colors">
+            <span class="material-symbols-outlined text-lg">dashboard</span> Dashboard
+        </a>
+        <a href="transactions.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-blue-50 text-blue-600 text-[13px] font-medium">
+            <span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 1;">swap_horiz</span> Transactions
+        </a>
+        <a href="alerts.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-500 hover:bg-slate-50 hover:text-slate-800 text-[13px] transition-colors">
+            <span class="material-symbols-outlined text-lg">notifications</span> Alerts
+        </a>
+        <a href="analytics.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-500 hover:bg-slate-50 hover:text-slate-800 text-[13px] transition-colors">
+            <span class="material-symbols-outlined text-lg">analytics</span> Analytics
+        </a>
+        <a href="ai-agents.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-500 hover:bg-slate-50 hover:text-slate-800 text-[13px] transition-colors">
+            <span class="material-symbols-outlined text-lg">memory</span> AI Agents
+        </a>
+    </nav>
 </aside>
+
+<!-- Main -->
 <main class="flex-1 bg-slate-50/50 relative overflow-x-hidden">
-<header class="flex justify-between items-center px-8 sticky top-0 z-50 w-full h-16 border-b border-slate-100 bg-white/80 backdrop-blur-xl">
-<div class="flex items-center gap-6 flex-1">
-<div class="relative w-full max-w-md">
-<span class="absolute inset-y-0 left-3 flex items-center text-slate-400"><span class="material-symbols-outlined text-lg">search</span></span>
-<input class="w-full bg-slate-100 border-none rounded-xl py-2.5 pl-10 pr-4 text-sm focus:ring-2 focus:ring-blue-500/20 placeholder:text-slate-400" placeholder="Search by ID, Sender or Receiver..." type="text"/>
-</div>
-</div>
-<div class="flex items-center gap-4">
-<button class="p-2 text-slate-400 hover:text-blue-500 transition-colors relative">
-<span class="material-symbols-outlined">notifications</span>
-<span class="absolute -top-0 -right-0 w-4 h-4 bg-red-500 text-white font-bold text-[9px] flex items-center justify-center rounded-full">3</span>
-</button>
-<div class="h-8 w-px bg-slate-100 mx-2"></div>
-<div class="flex items-center gap-3">
-<span class="text-xs font-medium text-right hidden sm:block"><span class="block text-slate-800">Alex Rivera</span><span class="block text-slate-400">Security Lead</span></span>
-<div class="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center text-white font-bold text-xs shadow-lg shadow-blue-500/20">AR</div>
-</div>
-</div>
+<header class="flex items-center px-8 sticky top-0 z-50 w-full h-14 border-b border-slate-100 bg-white/80 backdrop-blur-xl">
+    <h2 class="text-sm font-semibold text-slate-900">Transactions</h2>
 </header>
-<div class="p-8 space-y-8">
+
+<div class="p-8 space-y-6">
+
 <!-- Header & Summary -->
 <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
-<div>
-<h2 class="text-3xl font-extrabold tracking-tight text-slate-900 mb-2">All Transactions</h2>
-<div class="flex items-center gap-2 text-slate-500">
-<div class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
-<span class="text-sm font-medium">Monitoring 2,400+ transactions per hour</span>
+    <div>
+        <h2 class="text-2xl font-extrabold tracking-tight text-slate-900 mb-1">All Transactions</h2>
+        <p class="text-sm text-slate-400">Live data from IEEE-CIS fraud detection dataset</p>
+    </div>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 w-full lg:w-auto">
+        <div class="bg-white p-4 rounded-xl border border-slate-100 shadow-sm min-w-[130px]">
+            <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Total</p>
+            <p id="stat-total" class="text-xl font-black text-slate-900">...</p>
+        </div>
+        <div class="bg-white p-4 rounded-xl border border-slate-100 shadow-sm min-w-[130px]">
+            <p class="text-[10px] font-bold uppercase tracking-widest text-emerald-500 mb-1">Safe</p>
+            <p id="stat-safe" class="text-xl font-black text-emerald-500">...</p>
+        </div>
+        <div class="bg-white p-4 rounded-xl border border-slate-100 shadow-sm min-w-[130px]">
+            <p class="text-[10px] font-bold uppercase tracking-widest text-amber-500 mb-1">Suspicious</p>
+            <p id="stat-suspicious" class="text-xl font-black text-amber-500">...</p>
+        </div>
+        <div class="bg-white p-4 rounded-xl border border-slate-100 shadow-sm min-w-[130px]">
+            <p class="text-[10px] font-bold uppercase tracking-widest text-red-500 mb-1">Fraudulent</p>
+            <p id="stat-fraudulent" class="text-xl font-black text-red-500">...</p>
+        </div>
+    </div>
 </div>
-</div>
-<div class="grid grid-cols-2 md:grid-cols-4 gap-4 w-full lg:w-auto">
-<div class="bg-white p-4 rounded-xl border border-slate-100 shadow-sm min-w-[140px]">
-<p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Total</p>
-<p id="stat-total" class="text-xl font-black text-slate-900">...</p>
-</div>
-<div class="bg-white p-4 rounded-xl border border-slate-100 shadow-sm min-w-[140px]">
-<p class="text-[10px] font-bold uppercase tracking-widest text-emerald-500 mb-1">Safe</p>
-<p id="stat-safe" class="text-xl font-black text-emerald-500">...</p>
-</div>
-<div class="bg-white p-4 rounded-xl border border-slate-100 shadow-sm min-w-[140px]">
-<p class="text-[10px] font-bold uppercase tracking-widest text-amber-500 mb-1">Suspicious</p>
-<p id="stat-suspicious" class="text-xl font-black text-amber-500">...</p>
-</div>
-<div class="bg-white p-4 rounded-xl border border-slate-100 shadow-sm min-w-[140px]">
-<p class="text-[10px] font-bold uppercase tracking-widest text-red-500 mb-1">Fraudulent</p>
-<p id="stat-fraudulent" class="text-xl font-black text-red-500">...</p>
-</div>
-</div>
-</div>
-<!-- Filters -->
-<div class="bg-white p-6 rounded-xl border border-slate-100 shadow-sm flex flex-wrap items-end gap-6">
-<div class="space-y-2">
-<label class="block text-xs font-bold text-slate-400 uppercase tracking-wider">Date Range</label>
-<div class="bg-slate-50 px-3 py-2.5 rounded-xl flex items-center gap-2 border border-slate-200">
-<span class="material-symbols-outlined text-sm text-slate-400">calendar_today</span>
-<span class="text-sm text-slate-700">Oct 12 - Oct 19, 2023</span>
-</div>
-</div>
-<div class="space-y-2">
-<label class="block text-xs font-bold text-slate-400 uppercase tracking-wider">Status</label>
-<select class="bg-slate-50 border-slate-200 rounded-xl py-2.5 px-3 text-sm text-slate-700 focus:ring-blue-500 focus:border-blue-500 min-w-[150px]">
-<option>All Statuses</option><option>Safe</option><option>Suspicious</option><option>Fraud</option>
-</select>
-</div>
-<div class="space-y-2">
-<label class="block text-xs font-bold text-slate-400 uppercase tracking-wider">Amount Range</label>
-<div class="flex items-center gap-2">
-<input class="w-24 bg-slate-50 border-slate-200 rounded-xl py-2.5 px-3 text-sm" placeholder="Min" type="text"/>
-<span class="text-slate-300">—</span>
-<input class="w-24 bg-slate-50 border-slate-200 rounded-xl py-2.5 px-3 text-sm" placeholder="Max" type="text"/>
-</div>
-</div>
-<button class="bg-slate-100 hover:bg-slate-200 text-slate-600 border border-slate-200 px-6 py-2.5 rounded-xl text-sm font-semibold transition-colors flex items-center gap-2">
-<span class="material-symbols-outlined text-sm">filter_list</span> More Filters
-</button>
-<button class="ml-auto text-blue-500 text-sm font-bold hover:underline">Reset All</button>
-</div>
-<!-- Bulk Actions -->
-<div class="flex items-center justify-between px-2">
-<div class="flex items-center gap-4">
-<span class="text-xs text-slate-400 font-medium">12 transactions selected</span>
-<div class="flex items-center gap-2">
-<button class="px-4 py-2 bg-white hover:bg-slate-50 rounded-xl text-xs font-bold border border-slate-200 flex items-center gap-2 transition-all shadow-sm"><span class="material-symbols-outlined text-sm">download</span> Export CSV</button>
-<button class="px-4 py-2 bg-red-50 text-red-500 hover:bg-red-100 rounded-xl text-xs font-bold border border-red-100 flex items-center gap-2 transition-all"><span class="material-symbols-outlined text-sm">flag</span> Flag Selected</button>
-<button class="px-4 py-2 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 rounded-xl text-xs font-bold border border-emerald-100 flex items-center gap-2 transition-all"><span class="material-symbols-outlined text-sm">check_circle</span> Dismiss Selected</button>
-</div>
-</div>
-</div>
+
 <!-- Data Table -->
 <div class="bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-100">
-<div class="overflow-x-auto">
-<table class="w-full text-left border-collapse">
-<thead>
-<tr class="bg-slate-50 border-b border-slate-100 text-[11px] font-black uppercase tracking-widest text-slate-400">
-<th class="px-6 py-4 w-10"><input class="rounded border-slate-300 text-blue-500 focus:ring-blue-500" type="checkbox"/></th>
-<th class="px-4 py-4">Transaction ID</th><th class="px-4 py-4">Date/Time</th><th class="px-4 py-4">Amount</th>
-<th class="px-4 py-4">Sender Info</th><th class="px-4 py-4">Receiver Info</th><th class="px-4 py-4">Type</th>
-<th class="px-4 py-4">Risk Score</th><th class="px-4 py-4">AI Confidence</th><th class="px-4 py-4">Status</th>
-<th class="px-6 py-4 text-right">Actions</th>
-</tr>
-</thead>
-<tbody id="transactions-body" class="divide-y divide-slate-50 text-sm">
-    <tr><td colspan="11" class="px-6 py-8 text-center text-slate-400"><span class="material-symbols-outlined text-4xl animate-spin text-blue-500">sync</span><p class="mt-2 text-sm font-medium">Loading live data from IEEE-CIS dataset...</p></td></tr>
-</tbody>
-</table>
+    <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="bg-slate-50 border-b border-slate-100 text-[11px] font-black uppercase tracking-widest text-slate-400">
+                    <th class="px-4 py-4">Transaction ID</th>
+                    <th class="px-4 py-4">Date/Time</th>
+                    <th class="px-4 py-4">Amount</th>
+                    <th class="px-4 py-4">Sender</th>
+                    <th class="px-4 py-4">Receiver</th>
+                    <th class="px-4 py-4">Type</th>
+                    <th class="px-4 py-4">Risk Score</th>
+                    <th class="px-4 py-4">AI Confidence</th>
+                    <th class="px-4 py-4">Status</th>
+                    <th class="px-4 py-4 text-right">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="transactions-body" class="divide-y divide-slate-50 text-sm">
+                <tr><td colspan="10" class="px-6 py-8 text-center text-slate-400">
+                    <span class="material-symbols-outlined text-4xl animate-spin text-blue-500">sync</span>
+                    <p class="mt-2 text-sm font-medium">Loading transactions...</p>
+                </td></tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="p-6 bg-slate-50/50 border-t border-slate-100 flex items-center justify-between">
+        <p id="pagination-info" class="text-xs text-slate-400 font-medium">Loading...</p>
+        <div id="pagination-controls" class="flex gap-1"></div>
+    </div>
 </div>
-<div class="p-6 bg-slate-50/50 border-t border-slate-100 flex items-center justify-between">
-<p id="pagination-info" class="text-xs text-slate-400 font-medium">Loading...</p>
-<div id="pagination-controls" class="flex gap-1"></div>
-<div class="flex items-center gap-2">
-<button class="p-2 bg-slate-100 rounded-xl text-slate-400 disabled:opacity-30" disabled><span class="material-symbols-outlined">chevron_left</span></button>
-<div class="flex items-center gap-1">
-<button class="w-8 h-8 rounded-xl bg-blue-500 text-white text-xs font-bold shadow-sm">1</button>
-<button class="w-8 h-8 rounded-xl hover:bg-slate-100 text-slate-500 text-xs font-bold">2</button>
-<button class="w-8 h-8 rounded-xl hover:bg-slate-100 text-slate-500 text-xs font-bold">3</button>
-<span class="px-2 text-slate-300">...</span>
-<button class="w-8 h-8 rounded-xl hover:bg-slate-100 text-slate-500 text-xs font-bold">2486</button>
-</div>
-<button class="p-2 bg-slate-100 rounded-xl text-slate-500 hover:text-blue-500"><span class="material-symbols-outlined">chevron_right</span></button>
-</div>
-</div>
-</div>
+
 </div>
 </main>
 </div>
+
 <!-- Fraud Analysis Modal -->
 <div id="fraud-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] hidden items-center justify-center" onclick="if(event.target===this)closeFraudModal()">
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden">
@@ -210,17 +150,17 @@ async function loadTransactions(page = 1) {
     currentPage = page;
     const body = document.getElementById('transactions-body');
     const info = document.getElementById('pagination-info');
-    
-    body.innerHTML = '<tr><td colspan="11" class="px-6 py-8 text-center text-slate-400"><span class="material-symbols-outlined text-4xl animate-spin text-blue-500">sync</span><p class="mt-2 text-sm font-medium">Loading data...</p></td></tr>';
+
+    body.innerHTML = '<tr><td colspan="10" class="px-6 py-8 text-center text-slate-400"><span class="material-symbols-outlined text-4xl animate-spin text-blue-500">sync</span><p class="mt-2 text-sm font-medium">Loading data...</p></td></tr>';
 
     try {
         const data = await apiGet(`/api/transactions?page=${page}&per_page=10`);
-        
+
         // Update summary
-        document.getElementById('stat-total').textContent = formatCurrency(data.summary.total).replace('$','');
-        document.getElementById('stat-safe').textContent = formatCurrency(data.summary.safe).replace('$','');
-        document.getElementById('stat-suspicious').textContent = formatCurrency(data.summary.suspicious).replace('$','');
-        document.getElementById('stat-fraudulent').textContent = formatCurrency(data.summary.fraudulent).replace('$','');
+        document.getElementById('stat-total').textContent = data.summary.total.toLocaleString();
+        document.getElementById('stat-safe').textContent = data.summary.safe.toLocaleString();
+        document.getElementById('stat-suspicious').textContent = data.summary.suspicious.toLocaleString();
+        document.getElementById('stat-fraudulent').textContent = data.summary.fraudulent.toLocaleString();
 
         body.innerHTML = data.transactions.map(t => {
             const glowClass = t.risk_score >= 70 ? 'status-glow-error' : (t.risk_score >= 35 ? 'status-glow-warning' : '');
@@ -228,7 +168,6 @@ async function loadTransactions(page = 1) {
             const riskC = riskColor(t.risk_score);
             return `
             <tr class="hover:bg-slate-50/50 transition-colors ${glowClass}">
-                <td class="px-6 py-4"><input class="rounded border-slate-300 text-blue-500 focus:ring-blue-500" type="checkbox"/></td>
                 <td class="px-4 py-4 font-mono text-xs text-slate-500">${t.id}</td>
                 <td class="px-4 py-4 text-slate-700">${t.date}</td>
                 <td class="px-4 py-4 font-bold ${amountColor}">$${t.amount.toFixed(2)}</td>
@@ -238,9 +177,8 @@ async function loadTransactions(page = 1) {
                 <td class="px-4 py-4"><div class="flex items-center gap-2"><div class="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden"><div class="bg-${riskC}-500 h-full" style="width:${t.risk_score}%"></div></div><span class="text-xs font-bold text-${riskC}-500">${t.risk_score}</span></div></td>
                 <td class="px-4 py-4 text-slate-500">${t.ai_confidence}%</td>
                 <td class="px-4 py-4">${statusBadge(t.status)}</td>
-                <td class="px-6 py-4 text-right space-x-2">
+                <td class="px-4 py-4 text-right">
                     <button onclick="analyzeTx(${t.transaction_id})" class="p-1 hover:text-blue-500 text-slate-400 transition-colors"><span class="material-symbols-outlined">visibility</span></button>
-                    ${t.is_fraud ? '<button class="p-1 hover:text-red-500 text-slate-400 transition-colors"><span class="material-symbols-outlined">flag</span></button>' : ''}
                 </td>
             </tr>`;
         }).join('');
@@ -252,28 +190,27 @@ async function loadTransactions(page = 1) {
         renderPagination(data.pagination);
 
     } catch (err) {
-        body.innerHTML = `<tr><td colspan="11" class="px-6 py-8 text-center text-red-500"><p>Failed to load data. Is the backend running?</p><p class="text-xs font-mono mt-2">${err.message}</p></td></tr>`;
+        body.innerHTML = `<tr><td colspan="10" class="px-6 py-8 text-center text-red-500"><p>Failed to load data. Is the backend running?</p><p class="text-xs font-mono mt-2">${err.message}</p></td></tr>`;
     }
 }
 
 function renderPagination(pg) {
     const controls = document.getElementById('pagination-controls');
     let html = '';
-    
+
     html += `<button onclick="loadTransactions(${Math.max(1, pg.page - 1)})" class="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:bg-slate-50"><span class="material-symbols-outlined text-sm">chevron_left</span></button>`;
-    
-    // Simplistic pagination display (first, last, and neighbors)
+
     for(let i=1; i<=Math.min(3, pg.total_pages); i++) {
         html += `<button onclick="loadTransactions(${i})" class="w-8 h-8 flex items-center justify-center rounded-lg ${i===pg.page ? 'bg-blue-500 text-white font-bold' : 'text-slate-600 hover:bg-slate-100'} text-xs">${i}</button>`;
     }
-    
+
     if (pg.total_pages > 4) {
         html += `<span class="w-8 h-8 flex items-center justify-center text-slate-400">...</span>`;
         html += `<button onclick="loadTransactions(${pg.total_pages})" class="w-8 h-8 flex items-center justify-center rounded-lg ${pg.total_pages===pg.page ? 'bg-blue-500 text-white font-bold' : 'text-slate-600 hover:bg-slate-100'} text-xs">${pg.total_pages}</button>`;
     }
 
     html += `<button onclick="loadTransactions(${Math.min(pg.total_pages, pg.page + 1)})" class="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:bg-slate-50"><span class="material-symbols-outlined text-sm">chevron_right</span></button>`;
-    
+
     controls.innerHTML = html;
 }
 
@@ -285,15 +222,10 @@ async function analyzeTx(txnId) {
     content.innerHTML = '<p class="text-sm text-slate-400 animate-pulse text-center py-8">Fetching real sequence history for TX-' + txnId + '...</p>';
 
     try {
-        // Step 1: Get the real sequence for this user (card1)
         const seqRes = await apiGet(`/api/transaction-sequence/${txnId}`);
-        
         content.innerHTML = '<p class="text-sm text-slate-400 animate-pulse text-center py-8">Running LSTM inference on sequence history...</p>';
-
-        // Step 2: Make the prediction
         const data = await apiPost('/api/predict', { sequence: seqRes.sequence });
 
-        // Render results
         const pct = (data.fraud_probability * 100).toFixed(1);
         const isFraud = data.is_fraud;
         const color = isFraud ? 'red' : pct > 40 ? 'amber' : 'emerald';
@@ -315,15 +247,10 @@ async function analyzeTx(txnId) {
                         <div class="flex items-start gap-2">
                             <span class="material-symbols-outlined text-${color}-400 flex-shrink-0" style="font-size:14px;margin-top:2px">warning</span>
                             <p class="text-sm text-slate-600">${r}</p>
-                        </div>
-                    `).join('')}
+                        </div>`).join('')}
                 </div>
             </div>
-            <div class="flex gap-3">
-                <button onclick="closeFraudModal()" class="flex-1 py-2.5 bg-slate-100 text-slate-600 rounded-xl text-sm font-bold hover:bg-slate-200 transition-colors">Close</button>
-                ${isFraud ? '<button class="flex-1 py-2.5 bg-red-500 text-white rounded-xl text-sm font-bold hover:bg-red-600 transition-colors shadow-lg shadow-red-500/20">Block Transaction</button>' : ''}
-            </div>
-        `;
+            <button onclick="closeFraudModal()" class="w-full py-2.5 bg-slate-100 text-slate-600 rounded-xl text-sm font-bold hover:bg-slate-200 transition-colors">Close</button>`;
 
     } catch (err) {
         content.innerHTML = `
@@ -341,8 +268,6 @@ function closeFraudModal() {
     modal.classList.remove('flex');
 }
 
-// Load real data as soon as page loads
 document.addEventListener('DOMContentLoaded', () => loadTransactions(1));
 </script>
 </body></html>
-
