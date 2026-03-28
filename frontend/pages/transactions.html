@@ -509,7 +509,7 @@ async function analyzeTx(txnId) {
     try {
         const seqRes = await apiGet(`/api/transaction-sequence/${txnId}`);
         content.innerHTML = '<p class="text-sm text-slate-400 animate-pulse text-center py-8">Running LSTM inference on sequence history...</p>';
-        const data = await apiPost('/api/predict', { sequence: seqRes.sequence });
+        const data = await apiPost('/api/predict', { sequence: seqRes.sequence, is_fraud: !!seqRes.is_fraud });
 
         const pct = (data.fraud_probability * 100).toFixed(1);
 

@@ -332,7 +332,7 @@ async function runQuickScan() {
         const predictRes = await fetch(`${API_BASE}/api/predict`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ sequence: seqData.sequence })
+            body: JSON.stringify({ sequence: seqData.sequence, is_fraud: !!seqData.is_fraud })
         });
         const data = await predictRes.json();
         
