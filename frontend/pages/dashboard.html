@@ -304,37 +304,57 @@ async function runQuickScan() {
     if (!btn || !resultsEl) return;
 
     btn.disabled = true;
-    btn.textContent = 'Scanning...';
-    resultsEl.innerHTML = '<p class="text-sm text-slate-400 animate-pulse">Running LSTM model prediction...</p>';
 
     try {
-        const res = await fetch(`${API_BASE}/api/predict`, {
+        btn.textContent = 'Fetching live data...';
+        resultsEl.innerHTML = '<p class="text-sm text-slate-400 animate-pulse">Grabbing latest live transaction...</p>';
+        
+        // 1. Get latest transaction
+        const listRes = await fetch(`${API_BASE}/api/transactions?page=1&per_page=1`);
+        const listData = await listRes.json();
+        if (!listData.transactions || listData.transactions.length === 0) throw new Error("No live data found");
+        
+        const latestTx = listData.transactions[0];
+        const txnId = latestTx.transaction_id;
+        
+        btn.textContent = `Scanning TX-${txnId}...`;
+        resultsEl.innerHTML = `<p class="text-sm text-slate-400 animate-pulse">Building sequence history for TX-${txnId}...</p>`;
+        
+        // 2. Get sequence for this transaction
+        const seqRes = await fetch(`${API_BASE}/api/transaction-sequence/${txnId}`);
+        const seqData = await seqRes.json();
+        
+        if (!seqData.sequence) throw new Error("Failed to build sequence");
+        
+        resultsEl.innerHTML = `<p class="text-sm text-slate-400 animate-pulse">Running LSTM prediction array...</p>`;
+        
+        // 3. Run prediction
+        const predictRes = await fetch(`${API_BASE}/api/predict`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                sequence: [
-                    [150.0, 315.0], [22.5, 315.0], [89.99, 315.0],
-                    [450.0, 204.0], [12.0, 315.0], [67.5, 315.0],
-                    [200.0, 315.0], [33.0, 315.0], [99.0, 315.0],
-                    [1500.0, 100.0]
-                ]
-            })
+            body: JSON.stringify({ sequence: seqData.sequence })
         });
-        const data = await res.json();
-        const color = data.is_fraud ? 'red' : 'emerald';
-        const label = data.is_fraud ? 'FRAUD DETECTED' : 'LEGITIMATE';
+        const data = await predictRes.json();
+        
+        const pct = (data.fraud_probability * 100).toFixed(1);
+        const color = data.is_fraud ? 'red' : pct > 40 ? 'amber' : 'emerald';
+        const label = data.is_fraud ? 'FRAUD DETECTED' : pct > 40 ? 'SUSPICIOUS' : 'LEGITIMATE';
+        
         resultsEl.innerHTML = `
             <div class="flex items-center justify-between mb-2">
-                <span class="px-2.5 py-1 rounded-full bg-${color}-50 text-${color}-600 text-[10px] font-black uppercase border border-${color}-100">${label}</span>
-                <span class="text-lg font-bold text-slate-900">${(data.fraud_probability * 100).toFixed(1)}%</span>
+                <div class="flex items-center gap-2">
+                    <span class="px-2.5 py-1 rounded-full bg-${color}-50 text-${color}-600 text-[10px] font-black uppercase border border-${color}-100">${label}</span>
+                    <span class="text-[10px] text-slate-400 font-mono tracking-wider">TX-${txnId}</span>
+                </div>
+                <span class="text-lg font-bold text-slate-900">${pct}%</span>
             </div>
-            <div class="space-y-1">
-                ${data.reasons.map(r => `<p class="text-[11px] text-slate-500 flex items-center gap-1.5">
-                    <span class="material-symbols-outlined text-amber-400" style="font-size:12px">warning</span> ${r}
+            <div class="space-y-1.5 mt-3">
+                ${data.reasons.map(r => `<p class="text-[11px] text-slate-500 flex items-start gap-1.5 leading-tight">
+                    <span class="material-symbols-outlined text-${color}-400" style="font-size:14px;margin-top:1px">warning</span> ${r}
                 </p>`).join('')}
             </div>`;
     } catch (err) {
-        resultsEl.innerHTML = '<p class="text-sm text-red-400">API unreachable. Start the backend server.</p>';
+        resultsEl.innerHTML = `<p class="text-xs text-red-500 font-mono">Error: ${err.message}</p><p class="text-[10px] text-slate-400 mt-1">Make sure the backend is running.</p>`;
     }
 
     btn.disabled = false;

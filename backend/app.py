@@ -193,6 +193,43 @@ def _append_row_to_csv(row_dict: dict):
         print(f"⚠️  CSV write error: {e}")
 
 
+def _update_csv_fraud_status(txn_id: int, new_fraud_value: int):
+    """Update isFraud for a specific transaction in live_transactions.csv (run in executor)."""
+    try:
+        if not os.path.exists(LIVE_CSV_PATH):
+            return
+
+        with open(LIVE_CSV_PATH, "r") as f:
+            lines = f.readlines()
+
+        if len(lines) < 2:
+            return  # Only header or empty
+
+        # Find the column index for isFraud and TransactionID
+        header = lines[0].strip().split(",")
+        try:
+            id_idx = header.index("TransactionID")
+            fraud_idx = header.index("isFraud")
+        except ValueError:
+            return
+
+        updated = False
+        for i in range(1, len(lines)):
+            cols = lines[i].strip().split(",")
+            if len(cols) > max(id_idx, fraud_idx) and cols[id_idx] == str(txn_id):
+                cols[fraud_idx] = str(new_fraud_value)
+                lines[i] = ",".join(cols) + "\n"
+                updated = True
+                break
+
+        if updated:
+            with open(LIVE_CSV_PATH, "w") as f:
+                f.writelines(lines)
+            print(f"📝 CSV updated: TX-{txn_id} → isFraud={new_fraud_value}")
+    except Exception as e:
+        print(f"⚠️  CSV update error: {e}")
+
+
 # ---------------------------------------------------------------------------
 # WebSocket: Live Feed
 # ---------------------------------------------------------------------------
@@ -358,24 +395,60 @@ class TransactionAction(BaseModel):
 
 @app.post("/api/transactions/{txn_id}/action", tags=["Transactions"])
 async def take_transaction_action(txn_id: int, body: TransactionAction):
-    """Approve or block a flagged transaction from the review queue."""
+    """Approve or block a flagged transaction from the review queue.
+    - approve → set isFraud=0 (safe)
+    - block   → set isFraud=1 (confirmed fraud)
+    Persists the change to the DataFrame and CSV.
+    """
+    global df_transactions
     if body.action not in ("approve", "block"):
         raise HTTPException(status_code=400, detail="Action must be 'approve' or 'block'")
 
     reviewed_transactions[txn_id] = body.action
+    new_fraud_value = 0 if body.action == "approve" else 1
+
+    # Update the isFraud column in the live DataFrame
+    updated = False
+    with df_lock:
+        mask = df_transactions["TransactionID"] == txn_id
+        if mask.any():
+            old_value = int(df_transactions.loc[mask, "isFraud"].iloc[0])
+            df_transactions.loc[mask, "isFraud"] = new_fraud_value
+            updated = True
+
+    # Persist: rewrite the live CSV to reflect the change
+    if updated:
+        loop = asyncio.get_event_loop()
+        loop.run_in_executor(_csv_executor, _update_csv_fraud_status, txn_id, new_fraud_value)
+
+        # Update live_stats if fraud status changed
+        if old_value != new_fraud_value:
+            if body.action == "approve" and old_value == 1:
+                # Was fraud, now safe
+                live_stats["fraud_count"] = max(0, live_stats["fraud_count"] - 1)
+            elif body.action == "block" and old_value == 0:
+                # Was safe, now fraud
+                live_stats["fraud_count"] += 1
+                # Get the amount to add to fraud_prevented
+                with df_lock:
+                    amt_rows = df_transactions.loc[mask, "TransactionAmt"]
+                    if not amt_rows.empty:
+                        live_stats["fraud_prevented"] += float(amt_rows.iloc[0])
 
     # Broadcast the action to all WS clients so UIs update
     await broadcast({
         "type": "action_taken",
         "transaction_id": txn_id,
         "action": body.action,
+        "new_status": "safe" if body.action == "approve" else "fraud",
     })
 
     return {
         "success": True,
         "transaction_id": txn_id,
         "action": body.action,
-        "message": f"Transaction TX-{txn_id} has been {body.action}ed.",
+        "new_status": "safe" if body.action == "approve" else "fraud",
+        "message": f"Transaction TX-{txn_id} has been {body.action}ed and moved to {'safe' if body.action == 'approve' else 'fraud'}.",
     }
 
 
@@ -505,10 +578,12 @@ def get_transactions(
         df = df_transactions.copy()
 
     # Filter by fraud status
-    if status == "fraud":
+    if status == "fraudulent":
         df = df[df["isFraud"] == 1]
+    elif status == "suspicious":
+        df = df[(df["isFraud"] == 0) & (df["TransactionAmt"] > 1000)]
     elif status == "safe":
-        df = df[df["isFraud"] == 0]
+        df = df[(df["isFraud"] == 0) & (df["TransactionAmt"] <= 1000)]
 
     # Filter by amount
     if min_amount is not None:
@@ -580,7 +655,8 @@ def get_transactions(
     with df_lock:
         total_all = len(df_transactions)
         fraud_all = int(df_transactions["isFraud"].sum())
-        suspicious_est = int(len(df_transactions[df_transactions["TransactionAmt"] > 1000]) * 0.3)
+        suspicious_all = int(((df_transactions["isFraud"] == 0) & (df_transactions["TransactionAmt"] > 1000)).sum())
+        safe_all = int(((df_transactions["isFraud"] == 0) & (df_transactions["TransactionAmt"] <= 1000)).sum())
 
     return {
         "transactions": transactions,
@@ -592,8 +668,8 @@ def get_transactions(
         },
         "summary": {
             "total": total_all,
-            "safe": total_all - fraud_all - suspicious_est,
-            "suspicious": suspicious_est,
+            "safe": safe_all,
+            "suspicious": suspicious_all,
             "fraudulent": fraud_all,
         },
     }
@@ -839,6 +915,71 @@ def get_transaction_sequence(transaction_id: int):
         "card1": card1,
         "sequence_length": min(len(features), 10),
         "sequence": sequence,
+    }
+
+
+# ---------------------------------------------------------------------------
+# API Endpoint - Card Transaction History
+# ---------------------------------------------------------------------------
+@app.get("/api/card/{card1}/history", tags=["Transactions"])
+def get_card_history(card1: int):
+    """Return all transactions for a specific card1 value."""
+    if df_transactions is None:
+        raise HTTPException(status_code=503, detail="Dataset not loaded")
+
+    with df_lock:
+        card_df = df_transactions[df_transactions["card1"] == card1].copy()
+
+    if card_df.empty:
+        raise HTTPException(status_code=404, detail=f"No transactions found for card {card1}")
+
+    card_df = card_df.sort_values("TransactionDT", ascending=False)
+
+    total_txns = len(card_df)
+    fraud_txns = int(card_df["isFraud"].sum())
+    total_amount = float(card_df["TransactionAmt"].sum())
+    avg_amount = float(card_df["TransactionAmt"].mean())
+
+    # Return up to 50 most recent
+    names = ["Elena Vance", "Marcus Thorne", "Sarah Connor", "David Chen",
+             "James Wilson", "Linda Grey", "Robert Kim", "Ana Torres",
+             "Mike Johnson", "Priya Patel", "Tom Baker", "Lisa Wang",
+             "John Smith", "Emma Davis", "Carlos Ruiz"]
+    receivers = ["Global Crypto Ex", "Luxury Watch Co", "Whole Foods", "Steam Store",
+                 "Offshore Bank", "ATM #4421", "Netflix", "Amazon", "Best Buy",
+                 "PayPal Transfer", "Wire Services", "Apple Store", "Target",
+                 "Walmart", "Gas Station"]
+
+    base_date = datetime(2023, 10, 1)
+    transactions = []
+    for _, row in card_df.head(50).iterrows():
+        txn_id = int(row["TransactionID"])
+        amount = float(row["TransactionAmt"])
+        is_fraud = bool(row["isFraud"])
+        txn_date = base_date + timedelta(seconds=int(row["TransactionDT"]))
+
+        transactions.append({
+            "id": f"TX-{txn_id}",
+            "transaction_id": txn_id,
+            "date": txn_date.strftime("%b %d, %H:%M"),
+            "amount": round(amount, 2),
+            "is_fraud": is_fraud,
+            "product": str(row["ProductCD"]),
+            "addr1": int(row["addr1"]) if row["addr1"] else 0,
+            "sender": names[txn_id % len(names)],
+            "receiver": receivers[txn_id % len(receivers)],
+        })
+
+    return {
+        "card1": card1,
+        "summary": {
+            "total_transactions": total_txns,
+            "fraud_transactions": fraud_txns,
+            "fraud_rate": round(fraud_txns / total_txns * 100, 2) if total_txns > 0 else 0,
+            "total_amount": round(total_amount, 2),
+            "avg_amount": round(avg_amount, 2),
+        },
+        "transactions": transactions,
     }
 
 
