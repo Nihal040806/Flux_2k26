@@ -120,13 +120,17 @@ async def load_artifacts():
         try:
             print("Loading transaction dataset...")
             df_transactions = pd.read_csv(TRANSACTION_FILE, usecols=CSV_COLS, nrows=50_000)
-            df_transactions.fillna(0, inplace=True)
+            for col in df_transactions.columns:
+                fill_val = "" if col in ["ProductCD", "card4", "P_emaildomain"] else 0
+                df_transactions[col] = df_transactions[col].fillna(fill_val)
 
             # Also load previously saved live transactions and merge them
             if os.path.exists(LIVE_CSV_PATH):
                 try:
                     df_live = pd.read_csv(LIVE_CSV_PATH)
-                    df_live.fillna(0, inplace=True)
+                    for col in df_live.columns:
+                        fill_val = "" if col in ["ProductCD", "card4", "P_emaildomain"] else 0
+                        df_live[col] = df_live[col].fillna(fill_val)
                     # Prepend live rows so newest are at top
                     df_transactions = pd.concat([df_live, df_transactions], ignore_index=True)
                     print(f"✅ Merged {len(df_live)} saved live transactions")
@@ -371,7 +375,7 @@ async def simulate_live_traffic():
             "amount": round(amount, 2),
             "is_fraud": is_fraud,
             "risk_score": risk_score,
-            "sender": names[txn_id % len(names)],
+            "sender": names[card1 % len(names)],
             "receiver": receivers[txn_id % len(receivers)],
             "card1": card1,
             "product": product,
@@ -642,8 +646,8 @@ def get_transactions(
             "transaction_id": txn_id,
             "date": txn_date.strftime("%b %d, %H:%M"),
             "amount": round(amount, 2),
-            "sender": names[txn_id % len(names)],
-            "sender_account": f"AC-{txn_id % 100000:05d}",
+            "sender": names[int(row["card1"]) % len(names)],
+            "sender_account": f"AC-{int(row['card1']) % 100000:05d}",
             "receiver": receivers[txn_id % len(receivers)],
             "receiver_account": f"AC-{(txn_id * 7) % 100000:05d}",
             "type": types[txn_id % len(types)],
@@ -1037,7 +1041,7 @@ def get_card_history(card1: int):
             "is_fraud": is_fraud,
             "product": str(row["ProductCD"]),
             "addr1": int(row["addr1"]) if row["addr1"] else 0,
-            "sender": names[txn_id % len(names)],
+            "sender": names[card1 % len(names)],
             "receiver": receivers[txn_id % len(receivers)],
         })
 
