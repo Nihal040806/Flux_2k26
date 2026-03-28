@@ -65,8 +65,12 @@ tailwind.config = { theme: { extend: {
         <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight flex items-center gap-3">
             Fraud Alerts
             <span id="alerts-count-badge" class="bg-red-50 text-red-500 px-3 py-1 rounded-full text-sm font-bold border border-red-100">... Active Alerts</span>
+            <span class="flex items-center gap-1.5 ml-2 text-[10px] text-emerald-500 font-bold tracking-widest uppercase bg-emerald-50 px-2 py-1 rounded-full border border-emerald-100">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                LIVE
+            </span>
         </h1>
-        <p class="text-slate-400 text-sm mt-1">Alerts generated from actual fraud transactions in the dataset</p>
+        <p class="text-slate-400 text-sm mt-1">Live streaming identified fraud cases and analyst blocks in real-time.</p>
         <div id="alerts-summary" class="flex gap-4 mt-2"></div>
     </div>
 </div>
@@ -158,6 +162,10 @@ async function loadAlerts() {
     }
 }
 
-document.addEventListener('DOMContentLoaded', loadAlerts);
+document.addEventListener('DOMContentLoaded', () => {
+    loadAlerts();
+    // Poll for new live alerts every 4 seconds
+    setInterval(loadAlerts, 4000);
+});
 </script>
 </body></html>

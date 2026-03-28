@@ -567,6 +567,7 @@ def get_transactions(
     page: int = Query(1, ge=1),
     per_page: int = Query(10, ge=1, le=100),
     status: Optional[str] = Query(None),
+    card1: Optional[int] = Query(None),
     min_amount: Optional[float] = Query(None),
     max_amount: Optional[float] = Query(None),
 ):
@@ -576,6 +577,10 @@ def get_transactions(
 
     with df_lock:
         df = df_transactions.copy()
+
+    # Filter by card number
+    if card1 is not None:
+        df = df[df["card1"] == card1]
 
     # Filter by fraud status
     if status == "fraudulent":
