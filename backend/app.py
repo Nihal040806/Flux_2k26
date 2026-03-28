@@ -8,17 +8,21 @@ Also serves the frontend static files.
 
 import os
 import math
+import json
 import random
+import asyncio
+import threading
+from concurrent.futures import ThreadPoolExecutor
 import numpy as np
 import pandas as pd
 import joblib
 from datetime import datetime, timedelta
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Query, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
-from typing import List, Optional
+from typing import List, Optional, Dict
 import tensorflow as tf
 
 
@@ -32,8 +36,14 @@ FRONTEND_DIR = os.path.join(os.path.dirname(__file__), "..", "frontend")
 MODEL_PATH = os.path.join(MODEL_DIR, "fraud_model.h5")
 SCALER_PATH = os.path.join(MODEL_DIR, "scaler.pkl")
 TRANSACTION_FILE = os.path.join(DATA_DIR, "train_transaction.csv")
+LIVE_CSV_PATH = os.path.join(DATA_DIR, "live_transactions.csv")
 
 FRAUD_THRESHOLD = 0.7
+
+# Columns used by the application
+CSV_COLS = ["TransactionID", "TransactionAmt", "TransactionDT",
+            "ProductCD", "card1", "card4", "addr1", "addr2",
+            "P_emaildomain", "isFraud"]
 
 
 # ---------------------------------------------------------------------------
@@ -59,15 +69,29 @@ app.add_middleware(
 # ---------------------------------------------------------------------------
 model = None
 scaler = None
-df_transactions = None  # Loaded dataset
-dataset_stats = {}      # Precomputed stats
+df_transactions: Optional[pd.DataFrame] = None   # Live-synced DataFrame (source of truth)
+dataset_stats = {}                                 # Startup snapshot (used by /api/stats baseline)
+
+# Thread safety: protects df_transactions reads/writes
+df_lock = threading.Lock()
+
+# Background thread pool for non-blocking CSV I/O
+_csv_executor = ThreadPoolExecutor(max_workers=1, thread_name_prefix="csv-writer")
+
+# WebSocket state
+active_connections: List[WebSocket] = []
+live_stats = {"total_transactions": 0, "fraud_count": 0, "fraud_prevented": 0.0}
+reviewed_transactions: Dict[int, str] = {}  # txn_id -> action
+
+# Counter for generating unique IDs for simulated live transactions
+_live_txn_counter = 0
 
 
 # ---------------------------------------------------------------------------
 # Startup: Load Model, Scaler & Dataset
 # ---------------------------------------------------------------------------
 @app.on_event("startup")
-def load_artifacts():
+async def load_artifacts():
     """Load trained model, scaler, and transaction dataset at startup."""
     global model, scaler, df_transactions, dataset_stats
 
@@ -95,13 +119,21 @@ def load_artifacts():
     if os.path.exists(TRANSACTION_FILE):
         try:
             print("Loading transaction dataset...")
-            cols = ["TransactionID", "TransactionAmt", "TransactionDT",
-                    "ProductCD", "card1", "card4", "addr1", "addr2",
-                    "P_emaildomain", "isFraud"]
-            df_transactions = pd.read_csv(TRANSACTION_FILE, usecols=cols, nrows=50_000)
+            df_transactions = pd.read_csv(TRANSACTION_FILE, usecols=CSV_COLS, nrows=50_000)
             df_transactions.fillna(0, inplace=True)
 
-            # Precompute stats
+            # Also load previously saved live transactions and merge them
+            if os.path.exists(LIVE_CSV_PATH):
+                try:
+                    df_live = pd.read_csv(LIVE_CSV_PATH)
+                    df_live.fillna(0, inplace=True)
+                    # Prepend live rows so newest are at top
+                    df_transactions = pd.concat([df_live, df_transactions], ignore_index=True)
+                    print(f"✅ Merged {len(df_live)} saved live transactions")
+                except Exception:
+                    pass  # Empty or corrupt file, ignore
+
+            # Precompute baseline stats snapshot
             total = len(df_transactions)
             fraud_count = int(df_transactions["isFraud"].sum())
             legit_count = total - fraud_count
@@ -127,6 +159,224 @@ def load_artifacts():
     else:
         print(f"Dataset not found at {TRANSACTION_FILE}")
         dataset_stats = {}
+
+    # Initialize live stats from dataset
+    if dataset_stats:
+        live_stats["total_transactions"] = dataset_stats["total_transactions"]
+        live_stats["fraud_count"] = dataset_stats["fraud_count"]
+        live_stats["fraud_prevented"] = dataset_stats["fraud_amount_prevented"]
+
+    # Initialize live CSV file with header if it doesn't exist
+    if not os.path.exists(LIVE_CSV_PATH):
+        _init_live_csv()
+
+    # Start the live traffic simulator as a background task
+    asyncio.create_task(simulate_live_traffic())
+    print("🚀 Live traffic simulator started!")
+
+
+def _init_live_csv():
+    """Create the live_transactions.csv with header row."""
+    header = ",".join(CSV_COLS)
+    with open(LIVE_CSV_PATH, "w") as f:
+        f.write(header + "\n")
+    print(f"📄 Created {LIVE_CSV_PATH}")
+
+
+def _append_row_to_csv(row_dict: dict):
+    """Synchronously append a single row to live_transactions.csv (run in executor)."""
+    try:
+        line = ",".join(str(row_dict.get(col, 0)) for col in CSV_COLS)
+        with open(LIVE_CSV_PATH, "a") as f:
+            f.write(line + "\n")
+    except Exception as e:
+        print(f"⚠️  CSV write error: {e}")
+
+
+# ---------------------------------------------------------------------------
+# WebSocket: Live Feed
+# ---------------------------------------------------------------------------
+async def broadcast(message: dict):
+    """Send a message to all active WebSocket connections."""
+    dead = []
+    for ws in active_connections:
+        try:
+            await ws.send_json(message)
+        except Exception:
+            dead.append(ws)
+    for ws in dead:
+        active_connections.remove(ws)
+
+
+@app.websocket("/ws/live-feed")
+async def websocket_live_feed(websocket: WebSocket):
+    """WebSocket endpoint for real-time transaction feed."""
+    await websocket.accept()
+    active_connections.append(websocket)
+    print(f"🔌 WS connected. Active: {len(active_connections)}")
+    try:
+        while True:
+            # Keep connection alive by waiting for messages (ping/pong)
+            await websocket.receive_text()
+    except WebSocketDisconnect:
+        active_connections.remove(websocket)
+        print(f"🔌 WS disconnected. Active: {len(active_connections)}")
+
+
+async def simulate_live_traffic():
+    """
+    Background task: iterates through the real dataset, generates new
+    live transactions every 2 seconds, prepends them to the global
+    DataFrame, appends them to live_transactions.csv, and broadcasts
+    to all WebSocket clients.
+    """
+    global df_transactions, live_stats, _live_txn_counter
+    # Wait for startup to complete
+    await asyncio.sleep(3)
+
+    if df_transactions is None:
+        print("⚠️  Simulator: no dataset, exiting.")
+        return
+
+    names = ["Elena Vance", "Marcus Thorne", "Sarah Connor", "David Chen",
+             "James Wilson", "Linda Grey", "Robert Kim", "Ana Torres",
+             "Mike Johnson", "Priya Patel", "Tom Baker", "Lisa Wang",
+             "John Smith", "Emma Davis", "Carlos Ruiz"]
+    receivers = ["Global Crypto Ex", "Luxury Watch Co", "Whole Foods", "Steam Store",
+                 "Offshore Bank", "ATM #4421", "Netflix", "Amazon", "Best Buy",
+                 "PayPal Transfer", "Wire Services", "Apple Store", "Target",
+                 "Walmart", "Gas Station"]
+    risk_reasons_map = [
+        "High-value transaction detected",
+        "Unusual transaction pattern for this card",
+        "Transaction from new location",
+        "Rapid burst of transactions",
+        "Amount exceeds 90th percentile",
+        "Card used in different country",
+        "Multiple small transactions followed by large one",
+        "Merchant category mismatch",
+    ]
+
+    loop = asyncio.get_event_loop()
+
+    # Read the initial row count (thread-safe snapshot)
+    with df_lock:
+        source_df = df_transactions.copy()
+    total_rows = len(source_df)
+    print(f"📡 Simulator: streaming from {total_rows} source transactions...")
+
+    idx = 0
+    while True:
+        # Pick a source row to base the simulated transaction on
+        src_row = source_df.iloc[idx % total_rows]
+
+        _live_txn_counter += 1
+        # Give the live transaction a unique ID (high range to avoid collision)
+        txn_id = 9_000_000 + _live_txn_counter
+        amount = float(src_row["TransactionAmt"])
+        is_fraud = bool(src_row["isFraud"])
+        card1 = int(src_row["card1"])
+        product = str(src_row["ProductCD"])
+        txn_dt = int(src_row["TransactionDT"])
+        addr1 = int(src_row["addr1"]) if src_row["addr1"] else 0
+
+        # Calculate risk score
+        if is_fraud:
+            risk_score = random.randint(70, 99)
+        elif amount > 1000:
+            risk_score = random.randint(35, 69)
+        else:
+            risk_score = random.randint(1, 25)
+
+        # Pick reasons based on risk
+        if risk_score >= 60:
+            reasons = random.sample(risk_reasons_map, min(3, len(risk_reasons_map)))
+        elif risk_score >= 35:
+            reasons = random.sample(risk_reasons_map, 1)
+        else:
+            reasons = ["No specific risk indicators"]
+
+        base_date = datetime(2023, 10, 1)
+        txn_date = base_date + timedelta(seconds=txn_dt)
+
+        # --- 1) Prepend to global DataFrame (thread-safe) ---
+        new_row = {
+            "TransactionID": txn_id,
+            "TransactionAmt": round(amount, 2),
+            "TransactionDT": txn_dt,
+            "ProductCD": product,
+            "card1": card1,
+            "card4": 0,
+            "addr1": addr1,
+            "addr2": 0,
+            "P_emaildomain": 0,
+            "isFraud": int(is_fraud),
+        }
+        new_row_df = pd.DataFrame([new_row])
+
+        with df_lock:
+            df_transactions = pd.concat([new_row_df, df_transactions], ignore_index=True)
+
+        # --- 2) Append to CSV on disk (non-blocking via executor) ---
+        loop.run_in_executor(_csv_executor, _append_row_to_csv, new_row)
+
+        # --- 3) Update live running stats ---
+        live_stats["total_transactions"] += 1
+        if is_fraud:
+            live_stats["fraud_count"] += 1
+            live_stats["fraud_prevented"] += amount
+
+        # --- 4) Build & broadcast WebSocket payload ---
+        payload = {
+            "type": "live_transaction",
+            "transaction_id": txn_id,
+            "id": f"TX-{txn_id}",
+            "amount": round(amount, 2),
+            "is_fraud": is_fraud,
+            "risk_score": risk_score,
+            "sender": names[txn_id % len(names)],
+            "receiver": receivers[txn_id % len(receivers)],
+            "card1": card1,
+            "product": product,
+            "date": txn_date.strftime("%b %d, %H:%M"),
+            "reasons": reasons,
+            "timestamp": datetime.now().strftime("%H:%M:%S"),
+        }
+
+        await broadcast(payload)
+
+        idx += 1
+        await asyncio.sleep(2)
+
+
+# ---------------------------------------------------------------------------
+# API Endpoint - Transaction Action (approve/block from review queue)
+# ---------------------------------------------------------------------------
+class TransactionAction(BaseModel):
+    action: str = Field(..., description="Action: 'approve' or 'block'")
+
+
+@app.post("/api/transactions/{txn_id}/action", tags=["Transactions"])
+async def take_transaction_action(txn_id: int, body: TransactionAction):
+    """Approve or block a flagged transaction from the review queue."""
+    if body.action not in ("approve", "block"):
+        raise HTTPException(status_code=400, detail="Action must be 'approve' or 'block'")
+
+    reviewed_transactions[txn_id] = body.action
+
+    # Broadcast the action to all WS clients so UIs update
+    await broadcast({
+        "type": "action_taken",
+        "transaction_id": txn_id,
+        "action": body.action,
+    })
+
+    return {
+        "success": True,
+        "transaction_id": txn_id,
+        "action": body.action,
+        "message": f"Transaction TX-{txn_id} has been {body.action}ed.",
+    }
 
 
 # ---------------------------------------------------------------------------
@@ -205,12 +455,29 @@ def health_check():
 
 @app.get("/api/stats", tags=["Dashboard"])
 def get_dashboard_stats():
-    """Return real stats computed from the IEEE-CIS dataset."""
-    if not dataset_stats:
+    """Return live stats computed from the growing global DataFrame."""
+    if df_transactions is None:
         raise HTTPException(status_code=503, detail="Dataset not loaded")
 
+    # Compute stats from the live DataFrame (includes simulator rows)
+    with df_lock:
+        df = df_transactions
+        total = len(df)
+        fraud_count = int(df["isFraud"].sum())
+        legit_count = total - fraud_count
+        total_volume = float(df["TransactionAmt"].sum())
+        fraud_amount = float(df[df["isFraud"] == 1]["TransactionAmt"].sum())
+        avg_amount = float(df["TransactionAmt"].mean())
+
     return {
-        **dataset_stats,
+        "total_transactions": total,
+        "fraud_count": fraud_count,
+        "legit_count": legit_count,
+        "fraud_rate": round(fraud_count / total * 100, 2) if total > 0 else 0,
+        "avg_amount": round(avg_amount, 2),
+        "total_volume": round(total_volume, 2),
+        "fraud_amount_prevented": round(fraud_amount, 2),
+        "approval_rate": round(legit_count / total * 100, 1) if total > 0 else 0,
         "model_loaded": model is not None,
         "model_accuracy": 0.7721,
         "fraud_threshold": FRAUD_THRESHOLD,
@@ -230,11 +497,12 @@ def get_transactions(
     min_amount: Optional[float] = Query(None),
     max_amount: Optional[float] = Query(None),
 ):
-    """Return paginated transactions from the real dataset."""
+    """Return paginated transactions from the live global DataFrame."""
     if df_transactions is None:
         raise HTTPException(status_code=503, detail="Dataset not loaded")
 
-    df = df_transactions.copy()
+    with df_lock:
+        df = df_transactions.copy()
 
     # Filter by fraud status
     if status == "fraud":
@@ -308,10 +576,11 @@ def get_transactions(
             "product": str(row["ProductCD"]),
         })
 
-    # Summary counts (from full dataset)
-    total_all = len(df_transactions)
-    fraud_all = int(df_transactions["isFraud"].sum())
-    suspicious_est = int(len(df_transactions[df_transactions["TransactionAmt"] > 1000]) * 0.3)
+    # Summary counts (from the live global DataFrame)
+    with df_lock:
+        total_all = len(df_transactions)
+        fraud_all = int(df_transactions["isFraud"].sum())
+        suspicious_est = int(len(df_transactions[df_transactions["TransactionAmt"] > 1000]) * 0.3)
 
     return {
         "transactions": transactions,
@@ -335,11 +604,12 @@ def get_transactions(
 # ---------------------------------------------------------------------------
 @app.get("/api/alerts", tags=["Alerts"])
 def get_alerts():
-    """Generate alerts from actual fraud transactions in the dataset."""
+    """Generate alerts from actual fraud transactions in the live DataFrame."""
     if df_transactions is None:
         raise HTTPException(status_code=503, detail="Dataset not loaded")
 
-    fraud_txns = df_transactions[df_transactions["isFraud"] == 1].head(20)
+    with df_lock:
+        fraud_txns = df_transactions[df_transactions["isFraud"] == 1].head(20).copy()
 
     alert_types = [
         {"title": "Account Takeover Attempt", "desc": "Simultaneous transactions from disparate locations",
@@ -380,7 +650,8 @@ def get_alerts():
         })
 
     # Summary stats
-    total_fraud = int(df_transactions["isFraud"].sum())
+    with df_lock:
+        total_fraud = int(df_transactions["isFraud"].sum())
     return {
         "alerts": alerts,
         "summary": {
@@ -398,11 +669,12 @@ def get_alerts():
 # ---------------------------------------------------------------------------
 @app.get("/api/analytics", tags=["Analytics"])
 def get_analytics():
-    """Return analytics computed from the real dataset."""
+    """Return analytics computed from the live global DataFrame."""
     if df_transactions is None:
         raise HTTPException(status_code=503, detail="Dataset not loaded")
 
-    df = df_transactions
+    with df_lock:
+        df = df_transactions.copy()
     total = len(df)
     fraud = df[df["isFraud"] == 1]
     legit = df[df["isFraud"] == 0]
@@ -462,12 +734,13 @@ def get_analytics():
 # ---------------------------------------------------------------------------
 @app.get("/api/agents", tags=["AI Agents"])
 def get_agent_status():
-    """Return real-time status of AI agents."""
+    """Return real-time status of AI agents (reads from live DataFrame)."""
     if df_transactions is None:
         raise HTTPException(status_code=503, detail="Dataset not loaded")
 
-    total = len(df_transactions)
-    fraud_count = int(df_transactions["isFraud"].sum())
+    with df_lock:
+        total = len(df_transactions)
+        fraud_count = int(df_transactions["isFraud"].sum())
 
     return {
         "agents": [
@@ -542,12 +815,13 @@ def get_transaction_sequence(transaction_id: int):
     if df_transactions is None:
         raise HTTPException(status_code=503, detail="Dataset not loaded")
 
-    row = df_transactions[df_transactions["TransactionID"] == transaction_id]
-    if row.empty:
-        raise HTTPException(status_code=404, detail="Transaction not found")
+    with df_lock:
+        row = df_transactions[df_transactions["TransactionID"] == transaction_id]
+        if row.empty:
+            raise HTTPException(status_code=404, detail="Transaction not found")
 
-    card1 = int(row.iloc[0]["card1"])
-    card_txns = df_transactions[df_transactions["card1"] == card1].sort_values("TransactionDT")
+        card1 = int(row.iloc[0]["card1"])
+        card_txns = df_transactions[df_transactions["card1"] == card1].sort_values("TransactionDT").copy()
 
     # Build sequence from this card's history
     features = card_txns[["TransactionAmt", "addr1"]].values.tolist()
