@@ -240,15 +240,18 @@ async function loadAnalytics() {
         const topCards = data.top_fraud_cards;
         document.getElementById('fraud-cards').innerHTML = Object.entries(topCards)
             .map(([card, count], i) => `
-                <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100">
+                <div onclick="window.location.href='transactions.html?card1=${card}'" class="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100 cursor-pointer hover:bg-red-50 hover:border-red-200 hover:shadow-md transition-all group">
                     <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center text-red-500 text-xs font-bold">#${i+1}</div>
+                        <div class="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center text-red-500 text-xs font-bold group-hover:bg-red-100 transition-colors">#${i+1}</div>
                         <div>
-                            <p class="text-sm font-semibold text-slate-800">Card ${card}</p>
-                            <p class="text-[10px] text-slate-400">card1 identifier</p>
+                            <p class="text-sm font-semibold text-slate-800 group-hover:text-red-600 transition-colors">Card ${card}</p>
+                            <p class="text-[10px] text-slate-400">card1 identifier · <span class="text-blue-400 font-medium">Click to view</span></p>
                         </div>
                     </div>
-                    <span class="text-sm font-bold text-red-500">${count} frauds</span>
+                    <div class="flex items-center gap-2">
+                        <span class="text-sm font-bold text-red-500">${count} frauds</span>
+                        <span class="material-symbols-outlined text-slate-300 text-lg group-hover:text-red-400 transition-colors">arrow_forward</span>
+                    </div>
                 </div>`).join('');
 
         // Fraud Amount Stats

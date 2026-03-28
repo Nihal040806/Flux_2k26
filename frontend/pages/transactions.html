@@ -263,8 +263,8 @@ async function loadTransactions(page = 1) {
         totalPages = data.pagination.total_pages;
 
         body.innerHTML = data.transactions.map(t => {
-            const glowClass = t.risk_score >= 70 ? 'status-glow-error' : (t.risk_score >= 35 ? 'status-glow-warning' : '');
-            const amountColor = t.is_fraud ? 'text-red-500' : 'text-slate-800';
+            const glowClass = t.status === 'Fraudulent' ? 'status-glow-error' : (t.status === 'Suspicious' ? 'status-glow-warning' : '');
+            const amountColor = t.status === 'Fraudulent' ? 'text-red-500' : (t.status === 'Suspicious' ? 'text-amber-500' : 'text-slate-800');
             const riskC = riskColor(t.risk_score);
             const isHighlighted = highlightTxnId && t.transaction_id == highlightTxnId;
             const hlClass = isHighlighted ? 'highlight-row' : '';
@@ -442,9 +442,21 @@ function addLiveTransaction(txn) {
     document.getElementById('live-count-badge').textContent = `${liveCount} new`;
 
     const isFraud = txn.is_fraud;
-    const riskC = txn.risk_score >= 70 ? 'red' : (txn.risk_score >= 35 ? 'amber' : 'emerald');
-    const statusText = isFraud ? 'FRAUD' : (txn.risk_score >= 35 ? 'SUSPICIOUS' : 'SAFE');
-    const glowClass = isFraud ? 'status-glow-error' : (txn.risk_score >= 35 ? 'status-glow-warning' : '');
+    // Use same status logic as the transactions table (isFraud + amount threshold)
+    let statusText, riskC, glowClass;
+    if (isFraud) {
+        statusText = 'FRAUD';
+        riskC = 'red';
+        glowClass = 'status-glow-error';
+    } else if (txn.amount > 1000) {
+        statusText = 'SUSPICIOUS';
+        riskC = 'amber';
+        glowClass = 'status-glow-warning';
+    } else {
+        statusText = 'SAFE';
+        riskC = 'emerald';
+        glowClass = '';
+    }
 
     const tr = document.createElement('tr');
     tr.className = `live-row flash-new hover:bg-slate-50/50 transition-colors ${glowClass}`;
@@ -466,12 +478,16 @@ function addLiveTransaction(txn) {
         tbody.removeChild(tbody.lastChild);
     }
 
-    // Update summary stats on page 1 (live count growing)
-    const totalEl = document.getElementById('stat-total');
-    const currentTotal = parseInt(totalEl.textContent.replace(/,/g, '')) || 0;
-    if (currentTotal > 0) {
-        totalEl.textContent = (currentTotal + 1).toLocaleString();
-    }
+    // Update ALL summary stats (not just total)
+    const increment = (id) => {
+        const el = document.getElementById(id);
+        const val = parseInt(el.textContent.replace(/,/g, '')) || 0;
+        if (val > 0) el.textContent = (val + 1).toLocaleString();
+    };
+    increment('stat-total');
+    if (isFraud) increment('stat-fraudulent');
+    else if (txn.amount > 1000) increment('stat-suspicious');
+    else increment('stat-safe');
 }
 
 function clearLiveFeed() {
@@ -496,9 +512,11 @@ async function analyzeTx(txnId) {
         const data = await apiPost('/api/predict', { sequence: seqRes.sequence });
 
         const pct = (data.fraud_probability * 100).toFixed(1);
-        const isFraud = data.is_fraud;
-        const color = isFraud ? 'red' : pct > 40 ? 'amber' : 'emerald';
-        const label = isFraud ? 'FRAUDULENT' : pct > 40 ? 'SUSPICIOUS' : 'SAFE';
+
+        // Use table-consistent status from backend (same as the transactions table)
+        const label = seqRes.table_status.toUpperCase();
+        const colorMap = { 'FRAUDULENT': 'red', 'SUSPICIOUS': 'amber', 'SAFE': 'emerald' };
+        const color = colorMap[label] || 'emerald';
 
         // Store for "back" navigation
         lastAnalysis = { txnId, seqRes, data, pct, color, label };
@@ -509,7 +527,7 @@ async function analyzeTx(txnId) {
                     <span class="text-2xl font-black text-${color}-500">${pct}%</span>
                 </div>
                 <p class="text-lg font-bold text-slate-900">TX-${txnId}</p>
-                <p class="text-xs text-slate-400 mb-2">Analyzed ${seqRes.sequence_length} recent transactions</p>
+                <p class="text-xs text-slate-400 mb-2">Analyzed ${seqRes.sequence_length} recent transactions · Amount: $${seqRes.amount.toFixed(2)}</p>
                 <span class="px-3 py-1 rounded-full bg-${color}-50 text-${color}-600 text-[11px] font-black uppercase border border-${color}-100">${label}</span>
             </div>
 
@@ -591,12 +609,13 @@ async function loadCardHistory(card1) {
                     <p class="text-lg font-black text-slate-800">${s.total_transactions}</p>
                 </div>
                 <div class="bg-red-50 rounded-xl p-3 text-center">
-                    <p class="text-[9px] font-bold text-red-400 uppercase tracking-widest mb-1">Fraud</p>
+                    <p class="text-[9px] font-bold text-red-400 uppercase tracking-widest mb-1">Confirmed Fraud</p>
                     <p class="text-lg font-black text-red-500">${s.fraud_transactions}</p>
                 </div>
                 <div class="bg-amber-50 rounded-xl p-3 text-center">
-                    <p class="text-[9px] font-bold text-amber-500 uppercase tracking-widest mb-1">Fraud Rate</p>
-                    <p class="text-lg font-black text-amber-500">${s.fraud_rate}%</p>
+                    <p class="text-[9px] font-bold text-amber-500 uppercase tracking-widest mb-1">Flagged Rate</p>
+                    <p class="text-lg font-black text-amber-500">${s.flagged_rate}%</p>
+                    <p class="text-[8px] text-slate-400">${s.fraud_transactions} fraud + ${s.suspicious_transactions} suspicious</p>
                 </div>
                 <div class="bg-blue-50 rounded-xl p-3 text-center">
                     <p class="text-[9px] font-bold text-blue-400 uppercase tracking-widest mb-1">Avg Amount</p>
@@ -608,7 +627,7 @@ async function loadCardHistory(card1) {
 
             <!-- Transaction History Table -->
             <div class="mt-4">
-                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">Past Transactions (${Math.min(data.transactions.length, 50)} most recent)</p>
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">Past Transactions (${data.transactions.length} shown · all fraud included)</p>
                 <div class="overflow-x-auto rounded-xl border border-slate-100 max-h-[300px] overflow-y-auto">
                     <table class="w-full text-left border-collapse">
                         <thead class="sticky top-0 bg-slate-50 z-10">
@@ -622,18 +641,24 @@ async function loadCardHistory(card1) {
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-50 text-xs">
-                            ${data.transactions.map(t => `
-                                <tr class="hover:bg-slate-50/50 ${t.is_fraud ? 'status-glow-error' : ''}">
+                            ${data.transactions.map(t => {
+                                const rowGlow = t.status === 'FRAUD' ? 'status-glow-error' : (t.status === 'SUSPICIOUS' ? 'status-glow-warning' : '');
+                                const amtColor = t.status === 'FRAUD' ? 'text-red-500' : (t.status === 'SUSPICIOUS' ? 'text-amber-500' : 'text-slate-800');
+                                const badgeMap = {
+                                    'FRAUD': '<span class="px-1.5 py-0.5 rounded bg-red-50 text-red-500 text-[9px] font-black uppercase">FRAUD</span>',
+                                    'SUSPICIOUS': '<span class="px-1.5 py-0.5 rounded bg-amber-50 text-amber-500 text-[9px] font-black uppercase">SUSPICIOUS</span>',
+                                    'SAFE': '<span class="px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-500 text-[9px] font-black uppercase">SAFE</span>',
+                                };
+                                return `
+                                <tr class="hover:bg-slate-50/50 ${rowGlow}">
                                     <td class="px-3 py-2 font-mono text-slate-500">${t.id}</td>
                                     <td class="px-3 py-2 text-slate-600">${t.date}</td>
-                                    <td class="px-3 py-2 font-bold ${t.is_fraud ? 'text-red-500' : 'text-slate-800'}">$${t.amount.toFixed(2)}</td>
+                                    <td class="px-3 py-2 font-bold ${amtColor}">$${t.amount.toFixed(2)}</td>
                                     <td class="px-3 py-2 text-slate-500 truncate max-w-[150px]">${t.sender} → ${t.receiver}</td>
                                     <td class="px-3 py-2"><span class="px-1.5 py-0.5 bg-slate-100 rounded text-[9px] font-bold text-slate-500">${t.product}</span></td>
-                                    <td class="px-3 py-2">${t.is_fraud
-                                        ? '<span class="px-1.5 py-0.5 rounded bg-red-50 text-red-500 text-[9px] font-black uppercase">FRAUD</span>'
-                                        : '<span class="px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-500 text-[9px] font-black uppercase">SAFE</span>'
-                                    }</td>
-                                </tr>`).join('')}
+                                    <td class="px-3 py-2">${badgeMap[t.status] || badgeMap['SAFE']}</td>
+                                </tr>`;
+                            }).join('')}
                         </tbody>
                     </table>
                 </div>
@@ -670,6 +695,20 @@ async function initFromUrlParams() {
     const params = new URLSearchParams(window.location.search);
     const txnId = params.get('txn_id');
     const highlight = params.get('highlight');
+    const cardParam = params.get('card1');
+
+    // Handle card1 param (from analytics top fraud cards)
+    if (cardParam) {
+        const cardId = parseInt(cardParam);
+        if (!isNaN(cardId)) {
+            currentCardSearch = cardId;
+            const searchInput = document.getElementById('card-search-input');
+            if (searchInput) {
+                searchInput.value = cardId;
+                document.getElementById('clear-search-btn').classList.remove('hidden');
+            }
+        }
+    }
 
     if (txnId) {
         highlightTxnId = highlight || txnId;

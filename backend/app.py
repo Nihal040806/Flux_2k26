@@ -93,7 +93,7 @@ _live_txn_counter = 0
 @app.on_event("startup")
 async def load_artifacts():
     """Load trained model, scaler, and transaction dataset at startup."""
-    global model, scaler, df_transactions, dataset_stats
+    global model, scaler, df_transactions, dataset_stats, _live_txn_counter
 
     # Load model
     if os.path.exists(MODEL_PATH):
@@ -136,6 +136,22 @@ async def load_artifacts():
                     print(f"✅ Merged {len(df_live)} saved live transactions")
                 except Exception:
                     pass  # Empty or corrupt file, ignore
+
+            # Deduplicate by TransactionID (keep first = most recent)
+            before_dedup = len(df_transactions)
+            df_transactions = df_transactions.drop_duplicates(subset="TransactionID", keep="first").reset_index(drop=True)
+            dupes_removed = before_dedup - len(df_transactions)
+            if dupes_removed > 0:
+                print(f"🧹 Removed {dupes_removed} duplicate transactions")
+
+            # Initialize the live counter from the max existing live ID to avoid collisions
+            live_ids = df_transactions[df_transactions["TransactionID"] >= 9_000_000]["TransactionID"]
+            if not live_ids.empty:
+                _live_txn_counter = int(live_ids.max()) - 9_000_000
+                print(f"🔢 Live counter initialized to {_live_txn_counter}")
+
+            # Reset live CSV to avoid stale accumulation across restarts
+            _init_live_csv()
 
             # Precompute baseline stats snapshot
             total = len(df_transactions)
@@ -318,16 +334,19 @@ async def simulate_live_traffic():
         is_fraud = bool(src_row["isFraud"])
         card1 = int(src_row["card1"])
         product = str(src_row["ProductCD"])
-        txn_dt = int(src_row["TransactionDT"])
+        # Use a unique timestamp for each live transaction (spaced ~30-90s apart)
+        # so no two transactions ever share the same date/time
+        txn_dt = 900_000 + (_live_txn_counter * random.randint(30, 90))
         addr1 = int(src_row["addr1"]) if src_row["addr1"] else 0
 
-        # Calculate risk score
+        # Deterministic risk score from txn_id (matches the transactions endpoint)
+        seed_val = (txn_id * 2654435761) & 0xFFFFFFFF
         if is_fraud:
-            risk_score = random.randint(70, 99)
+            risk_score = 70 + (seed_val % 30)
         elif amount > 1000:
-            risk_score = random.randint(35, 69)
+            risk_score = 35 + (seed_val % 35)
         else:
-            risk_score = random.randint(1, 25)
+            risk_score = 1 + (seed_val % 25)
 
         # Pick reasons based on risk
         if risk_score >= 60:
@@ -480,39 +499,75 @@ def generate_explanations(sequence: np.ndarray) -> List[str]:
     amounts = sequence[:, 0]
     locations = sequence[:, 1]
 
-    avg_amount = np.mean(amounts[:-1]) if len(amounts) > 1 else amounts[0]
+    # Filter out zero-padded entries for more accurate analysis
+    non_zero_amounts = amounts[amounts > 0]
+    avg_amount = np.mean(non_zero_amounts) if len(non_zero_amounts) > 0 else 0
     last_amount = amounts[-1]
+
+    # 1. High amount spike (>3x average)
     if avg_amount > 0 and last_amount > 3 * avg_amount:
         reasons.append(
             f"High amount spike: last transaction (${last_amount:.2f}) "
             f"is >3x the average (${avg_amount:.2f})"
         )
+    # 2. Moderate amount spike (>1.5x average)
+    elif avg_amount > 0 and last_amount > 1.5 * avg_amount:
+        reasons.append(
+            f"Elevated transaction amount: ${last_amount:.2f} "
+            f"is {last_amount / avg_amount:.1f}x the card average (${avg_amount:.2f})"
+        )
 
-    unique_locs, counts = np.unique(locations[:-1], return_counts=True)
-    if len(unique_locs) > 0:
-        most_common_loc = unique_locs[np.argmax(counts)]
-        last_loc = locations[-1]
-        if last_loc != most_common_loc:
+    # 3. Above-average transaction value
+    if last_amount > 500:
+        reasons.append(
+            f"High-value transaction: ${last_amount:.2f} exceeds monitoring threshold ($500)"
+        )
+
+    # 4. Location change detection
+    non_zero_locs = locations[locations > 0]
+    if len(non_zero_locs) > 1:
+        unique_locs, counts = np.unique(non_zero_locs[:-1], return_counts=True)
+        if len(unique_locs) > 0:
+            most_common_loc = unique_locs[np.argmax(counts)]
+            last_loc = locations[-1]
+            if last_loc > 0 and last_loc != most_common_loc:
+                reasons.append(
+                    f"Location anomaly: addr1={int(last_loc)} "
+                    f"differs from primary location addr1={int(most_common_loc)}"
+                )
+
+    # 5. Multiple high-value transactions in sequence
+    if len(non_zero_amounts) > 0:
+        p75 = np.percentile(non_zero_amounts, 75)
+        high_txn_count = np.sum(amounts > p75)
+        if high_txn_count >= 3:
             reasons.append(
-                f"New location detected: addr1={int(last_loc)} "
-                f"differs from usual addr1={int(most_common_loc)}"
+                f"Repeated high-value pattern: "
+                f"{int(high_txn_count)} of {len(amounts)} transactions above ${p75:.2f}"
             )
 
-    high_txn_count = np.sum(amounts > np.percentile(amounts, 90))
-    if high_txn_count >= 3:
+    # 6. Location diversity check
+    num_unique_locs = len(np.unique(non_zero_locs)) if len(non_zero_locs) > 0 else 0
+    if num_unique_locs >= 3:
         reasons.append(
-            f"Multiple high-value transactions: "
-            f"{int(high_txn_count)} of {len(amounts)} above 90th percentile"
+            f"Geographic spread: {num_unique_locs} different addresses detected in recent history"
         )
 
-    num_unique_locs = len(np.unique(locations))
-    if num_unique_locs >= 4:
-        reasons.append(
-            f"High location diversity: {num_unique_locs} different addresses"
-        )
+    # 7. High amount variance (irregular spending pattern)
+    if len(non_zero_amounts) >= 3:
+        std_amount = np.std(non_zero_amounts)
+        if std_amount > avg_amount * 0.8:
+            reasons.append(
+                f"Irregular spending pattern: amount std deviation (${std_amount:.2f}) "
+                f"is high relative to average (${avg_amount:.2f})"
+            )
 
+    # 8. Fallback — should rarely trigger now
     if not reasons:
-        reasons.append("No specific risk indicators detected")
+        if last_amount > 100:
+            reasons.append(f"Transaction amount ${last_amount:.2f} flagged for routine review")
+        else:
+            reasons.append("Behavioral pattern deviation detected by LSTM model")
 
     return reasons
 
@@ -623,19 +678,20 @@ def get_transactions(
         amount = float(row["TransactionAmt"])
         is_fraud = int(row["isFraud"])
 
-        # Compute risk score from amount and fraud label
+        # Deterministic risk score & confidence from txn_id (consistent across loads)
+        seed_val = (txn_id * 2654435761) & 0xFFFFFFFF  # Knuth multiplicative hash
         if is_fraud:
-            risk_score = random.randint(70, 99)
+            risk_score = 70 + (seed_val % 30)           # 70-99
             status_label = "Fraudulent"
-            confidence = round(random.uniform(85, 99.9), 1)
+            confidence = round(85 + (seed_val % 150) / 10, 1)    # 85.0-99.9
         elif amount > 1000:
-            risk_score = random.randint(35, 69)
+            risk_score = 35 + (seed_val % 35)            # 35-69
             status_label = "Suspicious"
-            confidence = round(random.uniform(70, 90), 1)
+            confidence = round(70 + (seed_val % 200) / 10, 1)    # 70.0-89.9
         else:
-            risk_score = random.randint(1, 25)
+            risk_score = 1 + (seed_val % 25)             # 1-25
             status_label = "Safe"
-            confidence = round(random.uniform(95, 99.9), 1)
+            confidence = round(95 + (seed_val % 50) / 10, 1)     # 95.0-99.9
 
         # Generate a readable date from TransactionDT
         base_date = datetime(2023, 10, 1)
@@ -971,8 +1027,19 @@ def get_transaction_sequence(transaction_id: int):
         if row.empty:
             raise HTTPException(status_code=404, detail="Transaction not found")
 
-        card1 = int(row.iloc[0]["card1"])
+        txn_row = row.iloc[0]
+        card1 = int(txn_row["card1"])
+        is_fraud = int(txn_row["isFraud"])
+        amount = float(txn_row["TransactionAmt"])
         card_txns = df_transactions[df_transactions["card1"] == card1].sort_values("TransactionDT").copy()
+
+    # Compute table-consistent status
+    if is_fraud:
+        table_status = "Fraudulent"
+    elif amount > 1000:
+        table_status = "Suspicious"
+    else:
+        table_status = "Safe"
 
     # Build sequence from this card's history
     features = card_txns[["TransactionAmt", "addr1"]].values.tolist()
@@ -988,6 +1055,9 @@ def get_transaction_sequence(transaction_id: int):
     return {
         "transaction_id": transaction_id,
         "card1": card1,
+        "is_fraud": is_fraud,
+        "amount": round(amount, 2),
+        "table_status": table_status,
         "sequence_length": min(len(features), 10),
         "sequence": sequence,
     }
@@ -1011,6 +1081,7 @@ def get_card_history(card1: int):
     card_df = card_df.sort_values("TransactionDT", ascending=False)
 
     total_txns = len(card_df)
+    card_df["isFraud"] = card_df["isFraud"].astype(int)
     fraud_txns = int(card_df["isFraud"].sum())
     total_amount = float(card_df["TransactionAmt"].sum())
     avg_amount = float(card_df["TransactionAmt"].mean())
@@ -1025,13 +1096,44 @@ def get_card_history(card1: int):
                  "PayPal Transfer", "Wire Services", "Apple Store", "Target",
                  "Walmart", "Gas Station"]
 
+    # Compute fraud-related thresholds for this card
+    card_has_fraud = fraud_txns > 0
+    fraud_amounts = set()
+    if card_has_fraud:
+        fraud_amounts = set(card_df[card_df["isFraud"] == 1]["TransactionAmt"].round(2).tolist())
+
     base_date = datetime(2023, 10, 1)
     transactions = []
-    for _, row in card_df.head(50).iterrows():
+
+    # Always include ALL fraud transactions first, then fill with recent non-fraud
+    fraud_df = card_df[card_df["isFraud"] == 1].sort_values("TransactionDT", ascending=False)
+    non_fraud_df = card_df[card_df["isFraud"] == 0].sort_values("TransactionDT", ascending=False)
+    remaining_slots = max(0, 50 - len(fraud_df))
+    display_df = pd.concat([fraud_df, non_fraud_df.head(remaining_slots)])
+    # Sort the combined result by date descending so newest are on top
+    display_df = display_df.sort_values("TransactionDT", ascending=False)
+
+    suspicious_count = 0
+    for _, row in display_df.iterrows():
         txn_id = int(row["TransactionID"])
         amount = float(row["TransactionAmt"])
         is_fraud = bool(row["isFraud"])
         txn_date = base_date + timedelta(seconds=int(row["TransactionDT"]))
+
+        # Smart status: if this card has fraud history, mark non-fraud txns
+        # with similar amounts or high values as suspicious
+        if is_fraud:
+            status = "FRAUD"
+        elif card_has_fraud and round(amount, 2) in fraud_amounts:
+            # Same amount as a known fraudulent transaction → suspicious
+            status = "SUSPICIOUS"
+            suspicious_count += 1
+        elif card_has_fraud and amount > avg_amount * 1.5:
+            # Card has fraud history and this is a high-value txn → suspicious
+            status = "SUSPICIOUS"
+            suspicious_count += 1
+        else:
+            status = "SAFE"
 
         transactions.append({
             "id": f"TX-{txn_id}",
@@ -1039,18 +1141,26 @@ def get_card_history(card1: int):
             "date": txn_date.strftime("%b %d, %H:%M"),
             "amount": round(amount, 2),
             "is_fraud": is_fraud,
+            "status": status,
             "product": str(row["ProductCD"]),
             "addr1": int(row["addr1"]) if row["addr1"] else 0,
             "sender": names[card1 % len(names)],
             "receiver": receivers[txn_id % len(receivers)],
         })
 
+    total_flagged = fraud_txns + suspicious_count
+    fraud_rate = round(fraud_txns / total_txns * 100, 2) if total_txns > 0 else 0
+    flagged_rate = round(total_flagged / total_txns * 100, 2) if total_txns > 0 else 0
+
     return {
         "card1": card1,
         "summary": {
             "total_transactions": total_txns,
             "fraud_transactions": fraud_txns,
-            "fraud_rate": round(fraud_txns / total_txns * 100, 2) if total_txns > 0 else 0,
+            "suspicious_transactions": suspicious_count,
+            "total_flagged": total_flagged,
+            "fraud_rate": fraud_rate,
+            "flagged_rate": flagged_rate,
             "total_amount": round(total_amount, 2),
             "avg_amount": round(avg_amount, 2),
         },
