@@ -153,7 +153,7 @@ async function loadAlerts() {
                     </div>
                 </div>
                 <div class="pt-4 border-t border-slate-100">
-                    <button onclick="window.location.href='transactions.html'" class="px-4 py-2 bg-blue-500 text-white text-xs font-bold rounded-xl hover:bg-blue-600 shadow-sm">Investigate in Transactions</button>
+                    <button onclick="window.location.href='transactions.html?txn_id=${alert.transaction_id.replace('TX-','')}&highlight=${alert.transaction_id.replace('TX-','')}'" class="px-4 py-2 bg-blue-500 text-white text-xs font-bold rounded-xl hover:bg-blue-600 shadow-sm">Investigate in Transactions</button>
                 </div>
             </div>`;
         }).join('');

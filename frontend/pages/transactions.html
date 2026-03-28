@@ -24,6 +24,8 @@ tailwind.config = { theme: { extend: {
     .live-row { animation: slideIn 0.3s ease-out; }
     @keyframes flashNew { 0% { background: #dbeafe; } 100% { background: transparent; } }
     .flash-new { animation: flashNew 1.5s ease-out; }
+    @keyframes highlightPulse { 0% { background: #dbeafe; box-shadow: 0 0 0 0 rgba(59,130,246,0.4); } 50% { background: #bfdbfe; box-shadow: 0 0 12px 4px rgba(59,130,246,0.2); } 100% { background: #eff6ff; box-shadow: 0 0 0 0 rgba(59,130,246,0); } }
+    .highlight-row { animation: highlightPulse 2s ease-in-out 3; border-left: 4px solid #3b82f6 !important; }
 </style>
 </head>
 <body class="antialiased">
@@ -209,6 +211,7 @@ let lastAnalysis = null;
 
 let currentFilter = 'all';
 let currentCardSearch = null;
+let highlightTxnId = null; // Transaction ID to highlight (from URL params)
 
 function setFilter(status) {
     currentFilter = status;
@@ -263,8 +266,10 @@ async function loadTransactions(page = 1) {
             const glowClass = t.risk_score >= 70 ? 'status-glow-error' : (t.risk_score >= 35 ? 'status-glow-warning' : '');
             const amountColor = t.is_fraud ? 'text-red-500' : 'text-slate-800';
             const riskC = riskColor(t.risk_score);
+            const isHighlighted = highlightTxnId && t.transaction_id == highlightTxnId;
+            const hlClass = isHighlighted ? 'highlight-row' : '';
             return `
-            <tr class="hover:bg-slate-50/50 transition-colors ${glowClass}">
+            <tr id="txn-row-${t.transaction_id}" class="hover:bg-slate-50/50 transition-colors ${glowClass} ${hlClass}">
                 <td class="px-4 py-4 font-mono text-xs text-slate-500">${t.id}</td>
                 <td class="px-4 py-4 text-slate-700">${t.date}</td>
                 <td class="px-4 py-4 font-bold ${amountColor}">$${t.amount.toFixed(2)}</td>
@@ -279,6 +284,23 @@ async function loadTransactions(page = 1) {
                 </td>
             </tr>`;
         }).join('');
+
+        // Scroll to and auto-analyze highlighted row
+        if (highlightTxnId) {
+            const targetRow = document.getElementById('txn-row-' + highlightTxnId);
+            if (targetRow) {
+                const txnIdToAnalyze = parseInt(highlightTxnId);
+                // Clear highlight before async callback (so subsequent loads don't re-highlight)
+                highlightTxnId = null;
+                setTimeout(() => {
+                    targetRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    // Auto-open the analysis modal for the highlighted transaction
+                    if (!isNaN(txnIdToAnalyze)) {
+                        analyzeTx(txnIdToAnalyze);
+                    }
+                }, 300);
+            }
+        }
 
         const start = (data.pagination.page - 1) * data.pagination.per_page + 1;
         const end = Math.min(start + data.pagination.per_page - 1, data.pagination.total);
@@ -644,8 +666,53 @@ function closeFraudModal() {
 }
 
 // ======================= Init =======================
+async function initFromUrlParams() {
+    const params = new URLSearchParams(window.location.search);
+    const txnId = params.get('txn_id');
+    const highlight = params.get('highlight');
+
+    if (txnId) {
+        highlightTxnId = highlight || txnId;
+
+        try {
+            // Ask the backend which page this transaction is on
+            const findData = await apiGet(`/api/transactions/find/${txnId}?per_page=10`);
+
+            if (findData.found) {
+                if (findData.in_current_filter) {
+                    // Transaction is in the default "all" view – go to its page
+                    await loadTransactions(findData.page);
+                } else {
+                    // Transaction is under a different filter – switch to it
+                    const suggestedFilter = findData.suggested_filter || 'all';
+                    setFilter(suggestedFilter);
+
+                    // Re-find with the correct filter
+                    const findData2 = await apiGet(`/api/transactions/find/${txnId}?per_page=10&status=${suggestedFilter}`);
+                    if (findData2.found && findData2.in_current_filter) {
+                        highlightTxnId = highlight || txnId;
+                        await loadTransactions(findData2.page);
+                    } else {
+                        await loadTransactions(1);
+                    }
+                }
+            } else {
+                await loadTransactions(1);
+            }
+        } catch (err) {
+            console.warn('Could not find transaction:', err);
+            await loadTransactions(1);
+        }
+
+        // Clean up URL without reloading the page
+        window.history.replaceState({}, document.title, window.location.pathname);
+    } else {
+        loadTransactions(1);
+    }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
-    loadTransactions(1);
+    initFromUrlParams();
     connectWebSocket();
 });
 </script>

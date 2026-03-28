@@ -811,6 +811,72 @@ def get_analytics():
 
 
 # ---------------------------------------------------------------------------
+# API Endpoint - Find a specific transaction by ID (returns page + details)
+# ---------------------------------------------------------------------------
+@app.get("/api/transactions/find/{txn_id}", tags=["Transactions"])
+def find_transaction(txn_id: int, per_page: int = Query(10, ge=1, le=100), status: Optional[str] = Query(None)):
+    """Find which page a specific transaction is on and return its details."""
+    if df_transactions is None:
+        raise HTTPException(status_code=503, detail="Dataset not loaded")
+
+    with df_lock:
+        df = df_transactions.copy()
+
+    # Apply the same filters as the main transactions endpoint
+    if status == "fraudulent":
+        df = df[df["isFraud"] == 1]
+    elif status == "suspicious":
+        df = df[(df["isFraud"] == 0) & (df["TransactionAmt"] > 1000)]
+    elif status == "safe":
+        df = df[(df["isFraud"] == 0) & (df["TransactionAmt"] <= 1000)]
+
+    # Find the row index of this transaction
+    mask = df["TransactionID"] == txn_id
+    if not mask.any():
+        # If not found in filtered view, try unfiltered
+        with df_lock:
+            raw_mask = df_transactions["TransactionID"] == txn_id
+            if not raw_mask.any():
+                raise HTTPException(status_code=404, detail=f"Transaction {txn_id} not found")
+            row = df_transactions[raw_mask].iloc[0]
+            is_fraud = int(row["isFraud"])
+            amount = float(row["TransactionAmt"])
+            # Determine which filter shows this transaction
+            if is_fraud == 1:
+                suggested_filter = "fraudulent"
+            elif amount > 1000:
+                suggested_filter = "suspicious"
+            else:
+                suggested_filter = "safe"
+        return {
+            "found": True,
+            "transaction_id": txn_id,
+            "in_current_filter": False,
+            "suggested_filter": suggested_filter,
+            "page": 1,
+            "per_page": per_page,
+        }
+
+    # Find position index
+    indices = df.index.tolist()
+    matching_positions = [i for i, idx in enumerate(indices) if df.loc[idx, "TransactionID"] == txn_id]
+    if not matching_positions:
+        raise HTTPException(status_code=404, detail=f"Transaction {txn_id} not found")
+
+    position = matching_positions[0]
+    page = (position // per_page) + 1
+
+    return {
+        "found": True,
+        "transaction_id": txn_id,
+        "in_current_filter": True,
+        "page": page,
+        "per_page": per_page,
+        "position_in_page": (position % per_page),
+    }
+
+
+# ---------------------------------------------------------------------------
 # API Endpoints - AI Agents status
 # ---------------------------------------------------------------------------
 @app.get("/api/agents", tags=["AI Agents"])
